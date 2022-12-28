@@ -1,0 +1,199 @@
+.PostDetailsFlex {
+  display: flex;
+  background-color: #efefef;
+  /* margin-top: 10px; */
+}
+
+.smain-container {
+  margin-top: 7px;
+  border-radius: 5px;
+  padding: 10px 0;
+  background-color: white;
+  border: 1px solid rgb(192, 190, 190);
+}
+
+.DetailsContainer {
+  flex: 6;
+}
+
+.SinglePostRightFlex {
+  flex: 3;
+}
+
+.sprofile-container {
+  width: 95%;
+  margin-left: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sNameDate {
+  line-height: 1.2rem;
+}
+
+.sprofile-img {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.spostDate {
+  color: rgb(71, 70, 70);
+  font-size: 0.7rem;
+}
+
+.simg-name-box {
+  text-decoration: none;
+  display: flex;
+}
+
+.smain-pic {
+  object-fit: cover;
+  max-height: 370px;
+  width: 100%;
+}
+
+.spostUserdate {
+  color: black;
+}
+
+.sresIcons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sLikeShare {
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.sFlexLike {
+  display: flex;
+  flex-direction: row;
+  margin-left: 5%;
+}
+
+.sshareIcon {
+  margin-right: 5%;
+}
+
+.sPostTitle {
+  margin-top: 10px;
+  font-size: 1.7rem;
+  color: #000;
+  margin-left: 3%;
+  margin-right: 3%;
+}
+
+.sAlink {
+  text-decoration: none;
+}
+
+.sPostDesc {
+  color: #000;
+  margin-top: 7px;
+  margin-left: 3%;
+  margin-right: 3%;
+  line-height: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.CommentsSpacing {
+  margin: 20px 0;
+  display: none;
+  border-top: 1px solid rgb(192, 190, 190);
+}
+
+.activecom {
+  display: block;
+}
+
+.CommentsInputWrappers {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  margin: 20px 30px;
+}
+
+.EditPostion {
+  position: relative;
+}
+
+/* .EditLabel {
+  position: absolute;
+  margin-top: 27px;
+  margin-left: -37px;
+  background-color: white;
+  border-radius: 4px;
+  padding: 5px 7px;
+  border: 1px solid rgb(141, 141, 141);
+} */
+
+.SinglePostBtn {
+  display: flex;
+  margin: 15px 25px;
+  justify-content: space-evenly;
+}
+
+.Editbtn {
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.Editbtn:hover {
+  background-color: rgb(189, 189, 189);
+  color: #eeeeee;
+}
+
+.InputCommentBox {
+  width: 85%;
+  display: flex;
+  padding: 10px 5px;
+  outline: none;
+  border-radius: 5px;
+  border: 1px solid rgb(192, 190, 190);
+  align-items: center;
+}
+
+.InputCommentBtn {
+  background-color: rgb(97, 173, 236);
+  padding: 3px 5px;
+  color: white;
+  border-radius: 5px;
+  font-size: 35px !important;
+}
+
+.CommentsContains {
+  margin: 20px 50px;
+}
+
+.singlePostTitleInput {
+  margin: 20px 15px;
+}
+
+.singlePostTitle {
+  margin: 10px 0 !important;
+}
+
+.singlePostTitle:focus {
+  color: rgb(11, 66, 99) !important;
+}
+
+@media only screen and (max-width: 900px) {
+  .SinglePostRightFlex {
+    display: none;
+  }
+  .CommentsInputWrapper {
+    margin: 20px 10px;
+    justify-content: space-between;
+  }
+
+  .CommentsContains {
+    margin: 20px 20px;
+  }
+}

@@ -1,0 +1,11 @@
+.FrndsfeedFlex {
+  display: flex;
+  width: 100%;
+  background-color: #efefef;
+}
+
+.NofrndsLink {
+  font-size: 3rem;
+  text-decoration: none;
+  color: rgb(87, 84, 84);
+}

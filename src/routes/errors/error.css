@@ -1,0 +1,31 @@
+.errorContainer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  align-items: center;
+  text-align: center;
+}
+
+.error {
+  margin-top: 20px;
+  width: 80%;
+}
+
+.errorimage {
+  width: 60%;
+  object-fit: contain;
+}
+
+.unautherize {
+  margin-top: 25px;
+  font-size: 2.5rem;
+  color: rgb(109, 107, 107);
+}
+
+.errorhome {
+  margin-top: 20px;
+}
+
+.errorhomelink {
+  color: blue;
+}

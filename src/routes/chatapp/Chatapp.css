@@ -1,0 +1,137 @@
+.NoFrndtitle {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: 130px;
+}
+
+.NoFrnds {
+  margin: auto;
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: rgb(117, 115, 115);
+  margin-bottom: 10px;
+}
+
+.NoFrndsLabel {
+  margin: auto;
+}
+
+.messenger {
+  display: flex;
+  background-color: #f7f7f9;
+  width: 100%;
+}
+
+.chatMenu {
+  flex: 3;
+  position: sticky;
+  background-color: white;
+  height: calc(100vh - 55px);
+  overflow-y: auto;
+  width: 100%;
+}
+
+.chatBox {
+  flex: 7;
+  position: sticky;
+  height: calc(100vh - 55px);
+  overflow-y: auto;
+  width: 100%;
+}
+
+.chatMenuInput {
+  width: 90%;
+  padding: 10px 0;
+  border: none;
+}
+
+.chatBoxWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+
+.chatBoxTop {
+  height: 100%;
+  overflow-y: scroll;
+  padding-right: 10px;
+}
+
+.chatBoxBottom {
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-bottom: 10px;
+}
+
+.chatMessageInput {
+  width: 80%;
+  height: 40px;
+  padding: 10px;
+  outline: none;
+  border-radius: 5px;
+  border: 1px solid rgb(126, 125, 125);
+}
+
+.chatSubmitButton {
+  padding: 13px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #4cb0ec;
+  color: white;
+}
+
+.chatOnlineWrapper,
+.chatBoxWrapper {
+  height: 100%;
+}
+
+.chatMenuWrapper {
+  height: 100%;
+}
+
+.noConversationText {
+  position: absolute;
+  text-align: center;
+  margin: 0 5%;
+  top: 10%;
+  font-size: 50px;
+  color: rgb(224, 220, 220);
+  cursor: default;
+}
+
+.ChatNavItems {
+  color: rgb(14, 10, 10);
+  cursor: pointer;
+  top: 63px;
+  margin-top: 10px;
+  margin-left: 15px;
+  position: fixed;
+}
+
+.DoNotMsg {
+  text-align: center;
+  margin: 10px 10%;
+  border-radius: 4px;
+  border: 1px solid rgb(156, 156, 156);
+  background-color: rgb(255, 255, 255);
+  padding: 10px 20px;
+  font-size: 0.8rem;
+  color: rgb(119, 119, 119);
+}
+
+@media only screen and (max-width: 700px) {
+  .chatMenu {
+    position: fixed;
+    width: 100%;
+    z-index: 1;
+    display: none;
+  }
+  .ChatmenuActive {
+    display: block;
+  }
+}

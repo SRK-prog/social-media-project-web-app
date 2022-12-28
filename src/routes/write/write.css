@@ -1,0 +1,116 @@
+.WriteFlex {
+  display: flex;
+  background-color: #efefef;
+}
+
+.ForWrite {
+  flex: 6;
+  background-color: white;
+  margin-top: 20px;
+  border-radius: 5px;
+  width: 95%;
+}
+
+.writepost-img {
+  object-fit: cover;
+  width: 100%;
+  border-radius: 5px;
+}
+
+.WriteRightFlex {
+  flex: 2;
+}
+
+.InputBoxWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.InputWriteImger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding-top: 8px;
+  color: rgb(77, 74, 74);
+  font-weight: 900;
+  margin-left: 15px;
+}
+
+.SuccessMsg {
+  margin-left: 10px;
+  padding-top: 8px;
+  color: rgb(6, 175, 6);
+}
+
+.LoadingMsg {
+  margin-left: 10px;
+  padding-top: 8px;
+}
+
+.LoadingMsg {
+  animation: rotation 1s infinite linear;
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-359deg);
+  }
+}
+
+.FailedMsg {
+  margin-left: 10px;
+  padding-top: 8px;
+  color: red;
+}
+
+.writetext-box {
+  margin-top: 20px;
+}
+
+.Writepost-btns {
+  margin-top: 20px;
+  margin-left: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.linkback {
+  text-decoration: none;
+  padding: 9px 40px;
+  color: white;
+  margin-right: 20px;
+  font-size: 0.8rem;
+  border-radius: 5px;
+  background-color: rgba(55, 145, 248, 0.918);
+}
+
+.Writepost-btn {
+  padding: 11px 30px;
+  cursor: pointer;
+  color: white;
+  outline: none;
+  border: none;
+  border-radius: 5px;
+  background-color: rgba(55, 145, 248, 0.918);
+}
+
+.Writepost-btn:hover {
+  background-color: rgba(17, 127, 252, 0.918);
+}
+.linkback:hover {
+  background-color: rgba(17, 127, 252, 0.918);
+}
+
+.InputWriteImger:hover {
+  color: rgb(87, 177, 238);
+}
+
+@media only screen and (max-width: 900px) {
+  .WriteRightFlex {
+    flex: 0;
+  }
+}

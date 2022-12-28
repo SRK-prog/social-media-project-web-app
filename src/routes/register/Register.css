@@ -1,0 +1,42 @@
+.ressingle {
+  padding: 30px 10px 20px 10px;
+  border-radius: 5px;
+  margin: auto;
+  max-width: 350px !important;
+  border: 1px solid rgb(182, 182, 182);
+}
+
+.Reswidth {
+  width: 100%;
+}
+
+.restextbox {
+  margin-top: 1rem;
+}
+
+.respostbtns {
+  margin: 20px 0;
+}
+
+.restitle {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px;
+}
+
+.restoptitle {
+  font-size: 1.3rem;
+  font-weight: 500;
+}
+
+.restextbox {
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.restoplink:hover {
+  color: red;
+}
+.restoplink {
+  color: black;
+}

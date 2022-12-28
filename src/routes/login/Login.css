@@ -1,0 +1,60 @@
+.LoginWrap {
+  width: 100%;
+}
+
+.logsingle-post {
+  padding: 20px 10px 10px 10px;
+  border-radius: 5px;
+  margin: auto;
+  max-width: 350px !important;
+  border: 1px solid rgb(182, 182, 182);
+  text-align: center;
+}
+
+.text-box {
+  margin-top: 1rem;
+}
+
+.logpost-btns {
+  display: flex;
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.logpost-btn {
+  padding: 10px 40px;
+  color: white;
+  outline: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  background-color: rgb(47, 224, 255);
+}
+
+.logpost-btn:hover {
+  background-color: rgb(2, 175, 206);
+}
+
+.error-msg {
+  color: red;
+  margin: 10px 0;
+  font-size: 0.7rem;
+}
+
+.post-btn.del {
+  background-color: red;
+}
+
+.post-title {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 10px;
+}
+
+.top-link:hover {
+  color: red;
+}
+
+.top-link {
+  color: black;
+}
