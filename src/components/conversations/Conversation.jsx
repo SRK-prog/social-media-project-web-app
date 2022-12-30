@@ -3,7 +3,7 @@ import "./conversation.css";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 import BASE_URL from "../../api/URL";
 
-export default function Conversation({ conversation, currentUser }) {
+function Conversation({ conversation, currentUser, isActive }) {
   const [user, setUser] = useState([]);
 
   useEffect(() => {
@@ -18,16 +18,17 @@ export default function Conversation({ conversation, currentUser }) {
     };
     getUser();
   }, [currentUser, conversation]);
+
   return (
-    <>
-      <div className="conversation">
-        <img
-          className="conversationImg"
-          src={user?.profilepicture ? user.profilepicture : DEFAULT_AVATAR}
-          alt=""
-        />
-        <span className="conversationName">{user?.username}</span>
-      </div>
-    </>
+    <div className={`conversation ${isActive && "bg-gray-20"}`}>
+      <img
+        className="conversationImg"
+        src={user?.profilepicture ? user.profilepicture : DEFAULT_AVATAR}
+        alt=""
+      />
+      <span className="conversationName">{user?.username}</span>
+    </div>
   );
 }
+
+export default Conversation;

@@ -1,25 +1,47 @@
+import { useContext, useEffect, useState } from "react";
 import "./Chatapp.css";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import Conversation from "../../components/conversations/Conversation";
-import Message from "../../components/message/Message";
-import { useContext, useEffect, useRef, useState } from "react";
 import { Context } from "../../context/Context";
 import BASE_URL from "../../api/URL";
+import Loader from "../../common/components/loader";
+import SocketService from "../../services/socketService";
+import Conversations from "./Conversations";
 
-export default function Chatapp() {
+function Chatapp() {
   const [conversations, setConversations] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [timeout, setTime] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { user } = useContext(Context);
-  const scrollRef = useRef();
+
+  useEffect(() => {
+    // const socket = io("http://localhost:5000");
+    // const socket = new SocketService("http://localhost:5005");
+
+    // socket.joinChat();
+    // socket.onMessage((msg) => console.log(msg));
+
+    // return () => socket.disconnect();
+
+    // socket.emit("joinRoom", { username: "react", room: "JavaScript" });
+
+    // // Get room and users
+    // socket.on("roomUsers", ({ room, users }) => {
+    //   console.log(room, users);
+    // });
+
+    // socket.on("message", (message) => {
+    //   console.log(message);
+    // });
+    // console.log(socket);
+  }, []);
 
   useEffect(() => {
     document.title = "Chat | Mern";
     (async () => {
       try {
+        setIsLoading(true);
         const { data } = await BASE_URL.get("/conversations/" + user._id);
+        setIsLoading(false);
         setConversations(data);
       } catch (err) {
         console.log(err);
@@ -27,92 +49,43 @@ export default function Chatapp() {
     })();
   }, [user._id]);
 
-  useEffect(() => {
-    if (!currentChat) return;
-    (async () => {
-      try {
-        const { data } = await BASE_URL.get("/messages/" + currentChat?._id);
-        setMessages(data);
-      } catch (err) {
-        console.log(err);
-      }
-    })();
-  }, [currentChat]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const message = {
-      sender: user._id,
-      text: newMessage,
-      conversationId: currentChat._id,
-    };
-
-    try {
-      const { data } = await BASE_URL.post("/messages", message);
-      setMessages([...messages, data]);
-      setNewMessage("");
-    } catch (err) {
-      console.log(err);
-    }
+  const isActiveConversation = (members) => {
+    const friendId = members.find((i) => i !== user._id);
+    return currentChat?.members
+      ? currentChat?.members.includes(friendId)
+      : false;
   };
 
-  useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setTime(true);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
+  if (isLoading) return <Loader />;
 
   if (!!conversations.length) {
     return (
       <div className="messenger">
         <div className={`chatMenu ${!currentChat && "ChatmenuActive"}`}>
-          <div className="chatMenuWrapper">
+          <div className="h-full">
             {conversations.map((c) => (
               <div key={c._id} onClick={() => setCurrentChat(c)}>
-                <Conversation conversation={c} currentUser={user} />
+                <Conversation
+                  isActive={isActiveConversation(c.members)}
+                  conversation={c}
+                  currentUser={user}
+                />
               </div>
             ))}
           </div>
         </div>
 
-        <div className="chatBox">
+        <div className="chatBox px-4">
           <div className="chatBoxWrapper">
             {currentChat ? (
-              <>
-                <div className="chatBoxTop">
-                  <div className="DoNotMsg">
-                    Do not share any personal information in chat
-                  </div>
-                  {currentChat && (
-                    <div className="ChatNavItems">
-                      <ArrowBackIcon onClick={() => setCurrentChat(null)} />
-                    </div>
-                  )}
-                  {messages.map((m) => (
-                    <div ref={scrollRef} key={m._id}>
-                      <Message message={m} own={m.sender === user._id} />
-                    </div>
-                  ))}
-                </div>
-                <div className="chatBoxBottom">
-                  <input
-                    className="chatMessageInput"
-                    placeholder="Message..."
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    value={newMessage}
-                  ></input>
-                  <button className="chatSubmitButton" onClick={handleSubmit}>
-                    Send
-                  </button>
-                </div>
-              </>
+              <Conversations
+                user={user}
+                receiverId={currentChat?.members.find((i) => i !== user._id)}
+                currentChat={currentChat}
+                onClose={() => setCurrentChat(null)}
+              />
             ) : (
-              <span className="noConversationText">
+              <span className="grid place-content-center h-full text-ft50-60 text-gray-10 text-center">
                 Open a conversation to start a chat.
               </span>
             )}
@@ -120,20 +93,14 @@ export default function Chatapp() {
         </div>
       </div>
     );
-  } else {
-    return (
-      <>
-        {timeout && (
-          <>
-            <div className="NoFrndtitle">
-              <div className="NoFrnds">No Friends</div>
-              <div className="NoFrndsLabel">
-                Follow a Friend To Start Conversation
-              </div>
-            </div>
-          </>
-        )}
-      </>
-    );
   }
+
+  return (
+    <div className="flex flex-col justify-center mt-32">
+      <div className="NoFrnds">No Friends</div>
+      <div className="NoFrndsLabel">Follow a Friend To Start Conversation</div>
+    </div>
+  );
 }
+
+export default Chatapp;

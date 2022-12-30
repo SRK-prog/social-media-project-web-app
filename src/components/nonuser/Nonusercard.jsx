@@ -1,10 +1,10 @@
 import "./Nonuser.css";
-import { format } from "timeago.js";
 import FavoriteBorderOutlinedIcon from "@material-ui/icons/FavoriteBorderOutlined";
 import ModeCommentOutlinedIcon from "@material-ui/icons/ModeCommentOutlined";
 import ShareOutlinedIcon from "@material-ui/icons/ShareOutlined";
 import { connect } from "react-redux";
 import { useEffect } from "react";
+import moment from "moment";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 import { fetchUser } from "../../redux/actions";
 
@@ -26,7 +26,7 @@ const Nonusercard = ({ post, fetchUser, userInfo }) => {
           </div>
           <div className="NonNameDate">
             <div className="NonpostUserdate">{post.username}</div>
-            <div className="NonpostDate">{format(post.createdAt)}</div>
+            <div className="NonpostDate">{moment(post.createdAt).fromNow()}</div>
           </div>
         </span>
       </div>

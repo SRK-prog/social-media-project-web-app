@@ -1,6 +1,6 @@
 import "../../../components/cards/Cards.css";
 import { Link } from "react-router-dom";
-import { format } from "timeago.js";
+import moment from "moment";
 import FavoriteBorderOutlinedIcon from "@material-ui/icons/FavoriteBorderOutlined";
 import ModeCommentOutlinedIcon from "@material-ui/icons/ModeCommentOutlined";
 import ShareOutlinedIcon from "@material-ui/icons/ShareOutlined";
@@ -51,7 +51,7 @@ const CardItem = ({ post }) => {
           </div>
           <div className="NameDate">
             <div className="postUserdate">{post.username}</div>
-            <div className="postDate">{format(post.createdAt)}</div>
+            <div className="postDate">{moment(post.createdAt).fromNow()}</div>
           </div>
         </span>
       </div>

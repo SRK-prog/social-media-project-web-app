@@ -13,9 +13,7 @@ export const fetchUser = (userId) => (dispatch) => {
 
 const _fetchUser = _.memoize(async (userId, dispatch) => {
   const { data } = await BASE_URL.get("/users", {
-    params: {
-      userId,
-    },
+    params: { userId },
   });
   dispatch({ type: FETCH_USER, payload: data });
 });

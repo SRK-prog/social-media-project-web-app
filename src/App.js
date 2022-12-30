@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { HashRouter, Switch, Route, Redirect } from "react-router-dom";
 import { useContext } from "react";
+import { connect } from "react-redux";
 import Home from "./routes/home/Home";
 import Navbar from "./components/navbar/Navbar";
 import SinglePost from "./routes/singlePost/SinglePost";
@@ -14,9 +16,54 @@ import Error404 from "./routes/errors/Error404";
 import Contact from "./routes/contact/Contact";
 import Chatapp from "./routes/chatapp/Chatapp";
 import About from "./routes/about/About";
+import NotifyService from "./services/notifyService";
+import Utils from "./utils";
+import { actionTypes } from "./constants/constants";
+import BASE_URL from "./api/URL";
 
-function App() {
+const socket = new NotifyService();
+
+const { UPDATE_NOTIFY_SOCKET } = actionTypes;
+
+function App({ dispatch }) {
   const { user } = useContext(Context);
+
+  const receiveNotifications = async () => {
+    try {
+      if (window.location.hash === "#/chat") return;
+      await Utils.requestNotificationAccess();
+      socket.onMessage(async ({ sender, message }) => {
+        const { data } = await BASE_URL.get("/users", {
+          params: { userId: sender },
+        });
+        Utils.openNotification({
+          title: data?.username,
+          message: message,
+          icon: data?.profilepicture,
+        });
+      });
+    } catch (err) {
+      console.warn("Notification error", err);
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      if (!user?._id) return;
+      try {
+        await socket.connect("http://localhost:5005/chat", {
+          query: { id: user?._id },
+        });
+        await socket.join();
+        dispatch(UPDATE_NOTIFY_SOCKET, { socket, isConnected: true });
+        receiveNotifications();
+      } catch (error) {
+        console.error("error: ", error);
+      }
+    })();
+    return () => socket.disconnect();
+    // eslint-disable-next-line
+  }, [user?._id]);
 
   return (
     <HashRouter>
@@ -40,10 +87,12 @@ function App() {
         <Route path="/chat" component={user ? Chatapp : Register} />
         <Route path="/contact" component={Contact} />
         <Route path="/about" component={About} />
-        <Redirect exact from="*" to="/" />
+        <Redirect exact from="*" to="/error404" />
       </Switch>
     </HashRouter>
   );
 }
 
-export default App;
+const dispatch = Utils.dispatch;
+
+export default connect(null, { dispatch })(App);

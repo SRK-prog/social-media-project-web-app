@@ -5,7 +5,7 @@ import FavoriteIcon from "@material-ui/icons/Favorite";
 import FavoriteBorderOutlinedIcon from "@material-ui/icons/FavoriteBorderOutlined";
 import ModeCommentOutlinedIcon from "@material-ui/icons/ModeCommentOutlined";
 import ShareOutlinedIcon from "@material-ui/icons/ShareOutlined";
-import { format } from "timeago.js";
+import moment from "moment";
 import MoreVertIcon from "@material-ui/icons//MoreVert";
 import { useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router";
@@ -17,7 +17,6 @@ import { Context } from "../../context/Context";
 import Comments from "../../components/comments/Comments";
 import BASE_URL from "../../api/URL";
 import { DEFAULT_AVATAR } from "../../constants/constants";
-
 
 export default function SinglePost() {
   const [post, setPost] = useState({});
@@ -104,13 +103,17 @@ export default function SinglePost() {
               <div>
                 <img
                   className="sprofile-img"
-                  src={post.profilepicture ? post.profilepicture : DEFAULT_AVATAR}
+                  src={
+                    post.profilepicture ? post.profilepicture : DEFAULT_AVATAR
+                  }
                   alt=""
                 />
               </div>
               <div className="sNameDate">
                 <div className="spostUserdate">{post.username}</div>
-                <div className="spostDate">{format(post.createdAt)}</div>
+                <div className="spostDate">
+                  {moment(post.createdAt).fromNow()}
+                </div>
               </div>
             </Link>
             {post.username === user?.username && (
