@@ -18,12 +18,20 @@ module.exports = {
       gray: {
         10: "#e0dcdc",
         20: "#e7e7e7",
+        30: "#cec9c9",
+        40: "#7e7d7d",
+      },
+      blue: {
+        10: "#1877f2",
       },
     },
 
     extend: {
       fontSize: {
         "ft50-60": ["50px", { letterSpacing: "0em", lineHeight: "60px" }],
+      },
+      maxWidth: {
+        360: "1440px",
       },
     },
   },

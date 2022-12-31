@@ -48,28 +48,12 @@
 
 .chatBoxTop {
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
   padding-right: 10px;
 }
 
-.chatBoxBottom {
-  margin-top: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  margin-bottom: 10px;
-}
-
-.chatMessageInput {
-  width: 80%;
-  height: 40px;
-  padding: 10px;
-  outline: none;
-  border-radius: 5px;
-  border: 1px solid rgb(126, 125, 125);
-}
-
 .chatSubmitButton {
+  border: 1px solid #7e7d7d;
   padding: 13px 15px;
   border: none;
   border-radius: 5px;

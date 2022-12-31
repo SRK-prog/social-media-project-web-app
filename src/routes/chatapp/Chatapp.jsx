@@ -4,36 +4,53 @@ import Conversation from "../../components/conversations/Conversation";
 import { Context } from "../../context/Context";
 import BASE_URL from "../../api/URL";
 import Loader from "../../common/components/loader";
-import SocketService from "../../services/socketService";
 import Conversations from "./Conversations";
+import { connect } from "react-redux";
 
-function Chatapp() {
+function Chatapp({ socketChannel }) {
   const [conversations, setConversations] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [incomingMessage, setIncomingMessage] = useState({});
   const { user } = useContext(Context);
 
+  // useEffect(() => {
+
+  // }, []);
+
+  console.log("conversations: ", conversations);
+
+  const handleOnMessage = () => {
+    if (!socketChannel?.isConnected) return;
+    try {
+      window.socket.on("message", (data) => {
+        const message = {
+          sender: data?.sender,
+          text: data?.message,
+        };
+        console.log("data: ", data);
+        setIncomingMessage(message);
+        setConversations((prev) => {
+          const temp = prev.map((i) =>
+            i.members.includes(data?.sender) ? { ...i, text: data?.message } : i
+          );
+          return temp.sort((x, y) => {
+            return x.members.includes(data?.sender)
+              ? -1
+              : y.members.includes(data?.sender)
+              ? 1
+              : 0;
+          });
+        });
+      });
+    } catch (error) {
+      console.error("error handleOnMessage: ", error);
+    }
+  };
+
   useEffect(() => {
-    // const socket = io("http://localhost:5000");
-    // const socket = new SocketService("http://localhost:5005");
-
-    // socket.joinChat();
-    // socket.onMessage((msg) => console.log(msg));
-
-    // return () => socket.disconnect();
-
-    // socket.emit("joinRoom", { username: "react", room: "JavaScript" });
-
-    // // Get room and users
-    // socket.on("roomUsers", ({ room, users }) => {
-    //   console.log(room, users);
-    // });
-
-    // socket.on("message", (message) => {
-    //   console.log(message);
-    // });
-    // console.log(socket);
-  }, []);
+    handleOnMessage();
+  }, [socketChannel?.isConnected]);
 
   useEffect(() => {
     document.title = "Chat | Mern";
@@ -44,6 +61,7 @@ function Chatapp() {
         setIsLoading(false);
         setConversations(data);
       } catch (err) {
+        setIsLoading(false);
         console.log(err);
       }
     })();
@@ -60,7 +78,7 @@ function Chatapp() {
 
   if (!!conversations.length) {
     return (
-      <div className="messenger">
+      <div className="messenger max-w-360 mx-auto">
         <div className={`chatMenu ${!currentChat && "ChatmenuActive"}`}>
           <div className="h-full">
             {conversations.map((c) => (
@@ -75,11 +93,16 @@ function Chatapp() {
           </div>
         </div>
 
-        <div className="chatBox px-4">
+        <div className="chatBox">
           <div className="chatBoxWrapper">
             {currentChat ? (
               <Conversations
                 user={user}
+                incomingMessage={
+                  currentChat?.members?.includes(incomingMessage?.sender)
+                    ? incomingMessage
+                    : ""
+                }
                 receiverId={currentChat?.members.find((i) => i !== user._id)}
                 currentChat={currentChat}
                 onClose={() => setCurrentChat(null)}
@@ -103,4 +126,8 @@ function Chatapp() {
   );
 }
 
-export default Chatapp;
+const mapStateToProps = (state) => ({
+  socketChannel: state.notificationSocket,
+});
+
+export default connect(mapStateToProps)(Chatapp);

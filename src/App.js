@@ -1,5 +1,10 @@
 import { useEffect } from "react";
-import { HashRouter, Switch, Route, Redirect } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+} from "react-router-dom";
 import { useContext } from "react";
 import { connect } from "react-redux";
 import Home from "./routes/home/Home";
@@ -16,12 +21,12 @@ import Error404 from "./routes/errors/Error404";
 import Contact from "./routes/contact/Contact";
 import Chatapp from "./routes/chatapp/Chatapp";
 import About from "./routes/about/About";
-import NotifyService from "./services/notifyService";
+import SocketService from "./services/socketService";
 import Utils from "./utils";
 import { actionTypes } from "./constants/constants";
 import BASE_URL from "./api/URL";
 
-const socket = new NotifyService();
+const socket = new SocketService();
 
 const { UPDATE_NOTIFY_SOCKET } = actionTypes;
 
@@ -30,9 +35,9 @@ function App({ dispatch }) {
 
   const receiveNotifications = async () => {
     try {
-      if (window.location.hash === "#/chat") return;
       await Utils.requestNotificationAccess();
       socket.onMessage(async ({ sender, message }) => {
+        if (window.location.pathname === "/chat") return;
         const { data } = await BASE_URL.get("/users", {
           params: { userId: sender },
         });
@@ -66,7 +71,7 @@ function App({ dispatch }) {
   }, [user?._id]);
 
   return (
-    <HashRouter>
+    <Router>
       <Navbar />
       <Switch>
         <Route exact path="/" component={Home} />
@@ -89,7 +94,7 @@ function App({ dispatch }) {
         <Route path="/about" component={About} />
         <Redirect exact from="*" to="/error404" />
       </Switch>
-    </HashRouter>
+    </Router>
   );
 }
 

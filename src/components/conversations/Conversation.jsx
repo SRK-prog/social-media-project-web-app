@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
-import "./conversation.css";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 import BASE_URL from "../../api/URL";
+
+const formatText = (conv, curtUserId) => {
+  if (!conv?.text) return "";
+  if (conv?.sender === curtUserId) return `You: ${conv?.text}`;
+  return conv?.text;
+};
 
 function Conversation({ conversation, currentUser, isActive }) {
   const [user, setUser] = useState([]);
@@ -10,8 +15,10 @@ function Conversation({ conversation, currentUser, isActive }) {
     const friendId = conversation.members.find((m) => m !== currentUser._id);
     const getUser = async () => {
       try {
-        const res = await BASE_URL.get("/users?userId=" + friendId);
-        setUser(res.data);
+        const { data } = await BASE_URL.get("/users", {
+          params: { userId: friendId },
+        });
+        setUser(data);
       } catch (err) {
         console.log(err);
       }
@@ -20,13 +27,22 @@ function Conversation({ conversation, currentUser, isActive }) {
   }, [currentUser, conversation]);
 
   return (
-    <div className={`conversation ${isActive && "bg-gray-20"}`}>
+    <div
+      className={`flex items-center p-2.5 cursor-pointer hover:bg-gray-30 ${
+        isActive && "bg-gray-20"
+      }`}
+    >
       <img
-        className="conversationImg"
+        className="w-10 h-10 object-cover mr-5 rounded-full"
         src={user?.profilepicture ? user.profilepicture : DEFAULT_AVATAR}
         alt=""
       />
-      <span className="conversationName">{user?.username}</span>
+      <div className="font-medium">
+        <div>{user?.username}</div>
+        <div className="truncate w-40 text-xs">
+          {formatText(conversation, currentUser._id)}
+        </div>
+      </div>
     </div>
   );
 }
