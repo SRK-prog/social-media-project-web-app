@@ -1,5 +1,6 @@
-export const DEFAULT_AVATAR = "/images/default-avatar.png";
+export const DEFAULT_AVATAR = "/images/avatar.png";
+export const PROFILE_AVATAR = "/images/profile-avatar.png";
 
 export const actionTypes = {
-  UPDATE_NOTIFY_SOCKET: "UPDATE_NOTIFY_SOCKET",
+  UPDATE_SOCKET: "UPDATE_SOCKET",
 };

@@ -1,6 +1,5 @@
 import "./Cards.css";
-import { connect } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import moment from "moment";
 import FavoriteBorderOutlinedIcon from "@material-ui/icons/FavoriteBorderOutlined";
 import ModeCommentOutlinedIcon from "@material-ui/icons/ModeCommentOutlined";
@@ -9,16 +8,14 @@ import { Context } from "../../context/Context";
 import { useContext, useState, useEffect } from "react";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import BASE_URL from "../../api/URL";
-import { fetchUser } from "../../redux/actions";
+import { DEFAULT_AVATAR } from "../../constants/constants";
+import useSingleAndDoubleClick from "../../hooks/useSingleAndDoubleClick";
 
-const CardItem = ({ post, fetchUser, userInfo }) => {
+const CardItem = ({ post }) => {
   const [like, setLike] = useState(post.likes.length);
   const [isLiked, setIsLiked] = useState(false);
   const { user: currentUser } = useContext(Context);
-
-  useEffect(() => {
-    fetchUser(post.userId);
-  }, [fetchUser, post.userId]);
+  const history = useHistory();
 
   useEffect(() => {
     setIsLiked(post.likes.includes(currentUser._id));
@@ -34,53 +31,56 @@ const CardItem = ({ post, fetchUser, userInfo }) => {
     setIsLiked(!isLiked);
   };
 
+  const handleOnPostClick = useSingleAndDoubleClick(
+    () => history.push(`/postdetails/${post._id}`),
+    likeHandler
+  );
+
   return (
     <div className="main-container">
       <div className="profile-container">
-        <Link to={`/profile/${userInfo?.username}`} className="img-name-box">
+        <Link
+          to={`/profile/${post?.user?.username}`}
+          className="flex gap-2.5 pb-2"
+        >
           <div>
             <img
-              className="profile-img"
-              src={
-                userInfo?.profilepicture
-                  ? userInfo?.profilepicture
-                  : "/images/default-avatar.png"
-              }
+              className="h-10 w-10 object-cover rounded-full"
+              src={post?.user?.profilepicture || DEFAULT_AVATAR}
               alt=""
             />
           </div>
           <div className="NameDate">
-            <div className="postUserdate">{userInfo?.username}</div>
+            <div className="postUserdate">{post?.user?.username}</div>
             <div className="postDate">{moment(post.createdAt).fromNow()}</div>
           </div>
         </Link>
       </div>
-      <div>
-        {post.photo && <img className="main-pic" src={post.photo} alt="" />}
-      </div>
-      <div>
-        <Link className="Alink" to={`/postdetails/${post._id}`}>
-          <div className="PostTitle">{post.title}</div>
-          <div className="PostDesc">{post.desc}</div>
-        </Link>
+      <div onClick={handleOnPostClick}>
+        <div>
+          {post.photo && <img className="main-pic" src={post.photo} alt="" />}
+        </div>
+        <div>
+          <div className="PostTitle">{post?.title}</div>
+          <div className="PostDesc">{post?.description}</div>
+        </div>
       </div>
       <div className="resIcons">
         <div className="FlexLike">
-          <span className="LikeShare">
+          <button onClick={likeHandler} className="LikeShare">
             {isLiked ? (
-              <FavoriteIcon onClick={likeHandler} style={{ color: "red" }} />
+              <FavoriteIcon style={{ color: "red" }} />
             ) : (
-              <FavoriteBorderOutlinedIcon onClick={likeHandler} />
+              <FavoriteBorderOutlinedIcon />
             )}
             <span>{like}</span>
-          </span>
+          </button>
           <Link
             to={`/postdetails/${post._id}`}
             style={{ textDecoration: "none", color: "black" }}
             className="LikeShare"
           >
             <ModeCommentOutlinedIcon />
-            <span style={{ marginLeft: "3px" }}>{post.comments.length}</span>
           </Link>
         </div>
         <div className="shareIcon">
@@ -91,10 +91,4 @@ const CardItem = ({ post, fetchUser, userInfo }) => {
   );
 };
 
-const mapStateToProps = (state, ownProps) => {
-  return {
-    userInfo: state.user.find((user) => user._id === ownProps.post.userId),
-  };
-};
-
-export default connect(mapStateToProps, { fetchUser })(CardItem);
+export default CardItem;

@@ -17,16 +17,15 @@
 .NavActive {
     left: 0;
 }
-
-::-webkit-scrollbar {
+.Menubar::-webkit-scrollbar {
   width: 5px;
 }
 
-::-webkit-scrollbar-track {
+.Menubar::-webkit-scrollbar-track {
   background-color: #f1f1f1;
 }
 
-::-webkit-scrollbar-thumb {
+.Menubar::-webkit-scrollbar-thumb {
   background-color: rgb(179, 179, 179);
 }
 
@@ -90,7 +89,4 @@
 
 .IconsList:hover {
   color: rgb(53, 52, 52);
-}
-
-@media only screen and (max-width: 700px) {
 }

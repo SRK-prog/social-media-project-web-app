@@ -1,12 +1,13 @@
+import { useContext, useState } from "react";
 import "./Settings.css";
 import { Button, TextField } from "@material-ui/core";
 import Sidebar from "../../components/sidebar/Sidebar";
-import { useContext, useState, useEffect } from "react";
 import { Context } from "../../context/Context";
 import axios from "axios";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 import BASE_URL from "../../api/URL";
-import { useHistory } from "react-router-dom";
+
+document.title = "Settings";
 
 export default function Settings() {
   const { user, dispatch } = useContext(Context);
@@ -14,12 +15,7 @@ export default function Settings() {
   const [username, setUsername] = useState(user.username);
   const [city, setCity] = useState(user.city);
   const [email, setEmail] = useState(user.email);
-  const [propic, setPropicurl] = useState("");
-  const history = useHistory();
-
-  useEffect(() => {
-    document.title = "settings";
-  }, []);
+  const [propic, setPropicurl] = useState(user?.profilepicture);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,15 +29,33 @@ export default function Settings() {
       city,
     };
     try {
-      const res = await BASE_URL.put("/users/" + user._id, updatedUser);
-      res.data && history.push("/login");
+      const { data } = await BASE_URL.put("/users/" + user._id, updatedUser);
+
+      dispatch({ type: "LOGIN_SUCCESS", payload: data });
     } catch (err) {
       dispatch({ type: "UPDATE_FAILURE" });
     }
   };
 
+  const onImageChange = async (e) => {
+    const files = e.target.files[0];
+    const form = new FormData();
+    form.append("file", files);
+    form.append("upload_preset", "socialmedia-website");
+    form.append("cloud_name", "srksiva");
+    try {
+      const { data } = await axios.post(
+        "https://api.cloudinary.com/v1_1/srksiva/image/upload",
+        form
+      );
+      setPropicurl(data.secure_url);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
-    <div className="SettingsFlexBox">
+    <div className="flex max-w-360 mx-auto">
       <Sidebar />
       <form className="SettingsContainer">
         <div className="SetWrapper">
@@ -80,23 +94,7 @@ export default function Settings() {
               className="ProPhotoInput"
               type="file"
               accept="image/png, image/jpeg, image/jpg"
-              onChange={async (e) => {
-                const files = e.target.files[0];
-                const data = new FormData();
-                data.append("file", files);
-                data.append("upload_preset", "socialmedia-website");
-                data.append("cloud_name", "srksiva");
-                try {
-                  const prores = await axios.post(
-                    "https://api.cloudinary.com/v1_1/srksiva/image/upload",
-                    data
-                  );
-
-                  setPropicurl(prores.data.secure_url);
-                } catch (err) {
-                  console.log(err);
-                }
-              }}
+              onChange={onImageChange}
             />
           </div>
         </div>

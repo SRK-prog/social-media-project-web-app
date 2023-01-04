@@ -1,16 +1,17 @@
+import { useContext, useEffect, useState } from "react";
 import "./SinglePost.css";
 import { Link } from "react-router-dom";
-import { TextField } from "@material-ui/core";
-import FavoriteIcon from "@material-ui/icons/Favorite";
-import FavoriteBorderOutlinedIcon from "@material-ui/icons/FavoriteBorderOutlined";
-import ModeCommentOutlinedIcon from "@material-ui/icons/ModeCommentOutlined";
-import ShareOutlinedIcon from "@material-ui/icons/ShareOutlined";
+import { TextField, Button } from "@material-ui/core";
+import {
+  FavoriteBorderOutlined,
+  Favorite,
+  ModeCommentOutlined,
+  ShareOutlined,
+  MoreVert,
+  Send,
+} from "@material-ui/icons";
 import moment from "moment";
-import MoreVertIcon from "@material-ui/icons//MoreVert";
-import { useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router";
-import SendIcon from "@material-ui/icons/Send";
-import Button from "@material-ui/core/Button";
 import { useHistory } from "react-router-dom";
 import Sidebar from "../../components/sidebar/Sidebar";
 import { Context } from "../../context/Context";
@@ -24,11 +25,9 @@ export default function SinglePost() {
   const location = useLocation();
   const path = location.pathname.split("/")[2];
   const [isLiked, setIsLiked] = useState(false);
-  const { user: currentUser } = useContext(Context);
   const { user } = useContext(Context);
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
-  const [id, setId] = useState();
   const [updateMode, setUpdateMode] = useState(false);
   const [comments, setComments] = useState([]);
 
@@ -41,32 +40,41 @@ export default function SinglePost() {
     setCommentsbtn(!commentsbtn);
   };
   const likeHandler = () => {
+    setLike((prevLikes) => (isLiked ? prevLikes - 1 : prevLikes + 1));
+    setIsLiked((p) => !p);
     try {
-      BASE_URL.put("/posts/" + id + "/like", {
-        userId: currentUser._id,
-      });
+      BASE_URL.put("/posts/" + post?._id + "/like", { userId: user?._id });
     } catch (err) {}
-    setLike(isLiked ? like - 1 : like + 1);
-    setIsLiked(!isLiked);
+  };
+
+  const fetchComments = async () => {
+    try {
+      const { data } = await BASE_URL.get("/comments", {
+        params: { postId: path },
+      });
+      setComments(data);
+    } catch (error) {
+      console.error("comments err: ", error);
+    }
   };
 
   useEffect(() => {
     const getPost = async () => {
-      const res = await BASE_URL.get("/posts/" + path);
-      setComments(res.data.comments);
-      setPost(res.data);
-      setTitle(res.data.title);
-      setId(res.data._id);
-      setDesc(res.data.desc);
-      setLike(res.data.likes.length);
-      setIsLiked(res.data.likes.includes(currentUser._id));
+      const { data } = await BASE_URL.get("/posts/" + path);
+      setPost(data);
+      setTitle(data.title);
+      setDesc(data.description);
+      setLike(data.likes.length);
+      setIsLiked(data.likes.includes(user._id));
     };
     getPost();
-  }, [path, currentUser._id]);
+    fetchComments();
+    // eslint-disable-next-line
+  }, [path, user._id]);
 
   const handleDelete = async () => {
     try {
-      await BASE_URL.delete(`/posts/${id}`, {
+      await BASE_URL.delete(`/posts/${post?._id}`, {
         data: { username: user.username },
       });
       history.push("/");
@@ -75,37 +83,49 @@ export default function SinglePost() {
 
   const handleUpdate = async () => {
     try {
-      await BASE_URL.put(`/posts/${id}`, {
+      await BASE_URL.put(`/posts/${post?._id}`, {
         username: user.username,
+        description: desc,
         title,
-        desc,
       });
       setUpdateMode(false);
     } catch (err) {}
   };
 
-  const handlecommentSubmit = async () => {
+  const handlecommentSubmit = async (e) => {
+    e.preventDefault();
+    const postComment = {
+      postId: path,
+      userId: user._id,
+      comment: newcomment,
+    };
+    setComments((prev) => [
+      ...prev,
+      {
+        ...postComment,
+        user: {
+          username: user?.username,
+          profilepicture: user?.profilepicture,
+        },
+      },
+    ]);
+    setNewcomment("");
     try {
-      await BASE_URL.put(`/posts/${id}/comment`, {
-        comments: [{ comment: newcomment, userId: user.username }],
-      });
-      window.location.reload(false);
+      BASE_URL.post("/comments", postComment);
     } catch (err) {}
   };
 
   return (
-    <div className="PostDetailsFlex">
+    <div className="page-container">
       <Sidebar />
-      <div className="DetailsContainer">
+      <div className="flex-[6]">
         <div className="smain-container">
           <div className="sprofile-container">
             <Link to={`/profile/${post.username}`} className="simg-name-box">
               <div>
                 <img
                   className="sprofile-img"
-                  src={
-                    post.profilepicture ? post.profilepicture : DEFAULT_AVATAR
-                  }
+                  src={post.profilepicture || DEFAULT_AVATAR}
                   alt=""
                 />
               </div>
@@ -116,16 +136,13 @@ export default function SinglePost() {
                 </div>
               </div>
             </Link>
-            {post.username === user?.username && (
-              <>
-                <span className="EditPosition">
-                  <MoreVertIcon
-                    className="Editbtn"
-                    onClick={() => setUpdateMode(!updateMode)}
-                  />
-                  {/* <span className='EditLabel' >Edit</span> */}
-                </span>{" "}
-              </>
+            {post?.userId === user?._id && (
+              <span className="EditPosition">
+                <MoreVert
+                  className="Editbtn"
+                  onClick={() => setUpdateMode(!updateMode)}
+                />
+              </span>
             )}
           </div>
           <div>
@@ -153,12 +170,12 @@ export default function SinglePost() {
                     variant="outlined"
                     fullWidth
                     multiline
-                    rows={4}
+                    minRows={4}
                     className="singlePostTitle"
                     onChange={(e) => setDesc(e.target.value)}
                   />
                 </div>
-                <div className="SinglePostBtn">
+                <div className="flex justify-end gap-4 px-5 mb-5">
                   <Button
                     variant="contained"
                     style={{
@@ -188,61 +205,65 @@ export default function SinglePost() {
               </>
             )}
 
-            <div className="sresIcons">
-              <div className="sFlexLike">
-                <span className="sLikeShare">
+            <div className="flex items-center justify-between px-5 mb-5">
+              <div className="gap-1.5 flex items-center">
+                <button
+                  onClick={likeHandler}
+                  className="gap-1.5 flex items-center"
+                >
                   {isLiked ? (
-                    <FavoriteIcon
-                      onClick={likeHandler}
-                      style={{ color: "red" }}
-                    />
+                    <Favorite style={{ color: "red" }} />
                   ) : (
-                    <FavoriteBorderOutlinedIcon onClick={likeHandler} />
+                    <FavoriteBorderOutlined />
                   )}
                   <span>{like}</span>
-                </span>
-                <span className="sLikeShare">
-                  <ModeCommentOutlinedIcon onClick={CommentsToggle} />
-                  <span style={{ marginLeft: "3px" }}>{comments.length}</span>
-                </span>
+                </button>
+                <button
+                  onClick={CommentsToggle}
+                  className="gap-1.5 flex items-center"
+                >
+                  <ModeCommentOutlined />
+                  <span className="font-semibold">{comments.length}</span>
+                </button>
               </div>
-              <div className="sshareIcon">
-                <ShareOutlinedIcon />
+              <div className="">
+                <ShareOutlined />
               </div>
             </div>
           </span>
 
-          <div className={`CommentsSpacing ${commentsbtn ? "activecom" : ""}`}>
-            <h2 style={{ margin: "20px 30px" }}>Comments</h2>
-            <div className="CommentsInputWrappers">
+          <div
+            className={`CommentsSpacing px-8 ${commentsbtn ? "activecom" : ""}`}
+          >
+            <h2 className="my-8 text-2xl font-bold">Comments</h2>
+            <form
+              onSubmit={handlecommentSubmit}
+              className="flex gap-3 items-center"
+            >
               <input
                 type="text"
                 placeholder="Type a comment..."
-                className="InputCommentBox"
+                className="rounded-full outline-gray-40 outline h-10 outline-2 px-4 py-2 flex-grow"
+                value={newcomment}
                 onChange={(e) => setNewcomment(e.target.value)}
               />
-              <SendIcon
-                className="InputCommentBtn"
+              <button
+                className="bg-blue-10 rounded-full w-12 h-12 grid place-content-center"
                 onClick={handlecommentSubmit}
-              />
-            </div>
+                type="submit"
+              >
+                <Send className="text-white" />
+              </button>
+            </form>
             <div className="CommentsContains">
-              {comments
-                .slice(0)
-                .reverse()
-                .map((com) => (
-                  <Comments
-                    com={com.comment}
-                    newcomment={newcomment}
-                    name={com.userId}
-                    key={com._id}
-                  />
-                ))}
+              {comments.map((comment) => (
+                <Comments key={comment?._id} comment={comment} />
+              ))}
             </div>
           </div>
         </div>
       </div>
-      <div className="SinglePostRightFlex"></div>
+      <div className="md:flex-[3]"></div>
     </div>
   );
 }

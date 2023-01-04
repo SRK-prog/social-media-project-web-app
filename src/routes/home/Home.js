@@ -10,23 +10,21 @@ import { useContext } from "react";
 import Skeleton from "../../components/Skeleton/Skeleton";
 import { fetchPosts } from "../../redux/actions";
 
+document.title = "Social Media";
+
 function Home({ posts, fetchPosts }) {
   const { user } = useContext(Context);
-
-  useEffect(() => {
-    document.title = "Mern";
-  }, []);
 
   useEffect(() => {
     fetchPosts();
   }, [fetchPosts]);
 
   return (
-    <div className="homeFlex">
+    <div className="homeFlex max-w-360 mx-auto">
       <Sidebar />
       {posts.length === 0 ? (
         <>
-          <div style={{ display: "flex", flexDirection: "column", flex: "6" }}>
+          <div className="flex flex-col flex-[6.5] md:px-0 px-2" >
             {[1, 2, 3, 4, 5].map((k) => (
               <Skeleton key={k} />
             ))}
@@ -44,27 +42,3 @@ const mapStateToProps = (state) => {
 };
 
 export default connect(mapStateToProps, { fetchPosts })(Home);
-
-// {
-//  <>
-// <div className="homeFlex">
-//   <Sidebar />
-//   {props.posts ? (
-//     <>
-//       <div
-//         style={{ display: "flex", flexDirection: "column", flex: "6" }}
-//       >
-//         {[1, 2, 3, 4, 5].map(() => (
-//           <Skeleton />
-//         ))}
-//       </div>
-//     </>
-//   ) : (
-//     <>
-//       {user ? <Cards posts={props.posts} /> : <Nonuser posts={posts} />}
-//     </>
-//   )}
-//   <Rightbox />
-// </div>
-// </>
-// }

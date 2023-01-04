@@ -5,14 +5,11 @@ import Navlinks from "./Navlinks";
 
 function Cards({ posts, NoLink }) {
   return (
-    <div className="cardss">
+    <div className="cardss md:px-0 px-2">
       {!NoLink && <Navlinks />}
-      {posts
-        .slice(0)
-        .reverse()
-        .map((p, index) =>
-          p === null ? "" : <CardItem post={p} key={index} />
-        )}
+      {posts.map((p, index) =>
+        p === null ? "" : <CardItem post={p} key={index} />
+      )}
     </div>
   );
 }

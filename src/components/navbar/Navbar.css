@@ -1,64 +1,17 @@
 :root {
-  --primary-color: rgb(8, 53, 121);
+  --primary-color: #083579;
   --secondary-color: white;
 }
 
 .topbarContainer {
   height: 55px;
-  width: 100%;
   box-shadow: 0 1px 5px -3px #000;
   background-color: var(--secondary-color);
   display: flex;
   align-items: center;
-  position: fixed;
+  position: sticky;
   top: 0;
   z-index: 999;
-}
-
-.menuBtn {
-  border: none;
-  outline: none;
-  cursor: pointer;
-  display: none;
-  left: -3px;
-  top: 15px;
-  position: fixed;
-  margin-left: 20px;
-  background-color: rgb(255, 255, 255);
-  color: rgb(104, 97, 97);
-}
-
-.topbarLeft {
-  flex: 1.5;
-  display: flex;
-  justify-content: center;
-}
-
-.logo {
-  font-size: 24px;
-  margin-left: 10px;
-  font-weight: bold;
-  text-decoration: none;
-  color: white;
-  cursor: pointer;
-  background-color: black;
-  padding: 3px 7px;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-}
-
-.LogoList {
-  font-size: 6px;
-  /* font-weight: 800; */
-}
-
-.LogoLists {
-  line-height: 10px;
-}
-
-.topbarCenter {
-  flex: 3;
 }
 
 .searchbar {
@@ -104,7 +57,6 @@
 }
 
 .topbarRight {
-  flex: 7.5;
   display: flex;
   align-items: center;
   justify-content: right;
@@ -112,7 +64,6 @@
 }
 
 .topbarLink {
-  margin-right: 10px;
   font-size: 14px;
   cursor: pointer;
   color: #000;
@@ -125,13 +76,11 @@
 
 .topbarIcons {
   display: flex;
-  margin: 0 30px 0 30px;
   align-items: center;
   position: relative;
 }
 
 .topbarIconItem {
-  margin-right: 25px;
   cursor: pointer;
   position: relative;
 }
@@ -162,43 +111,10 @@
   font-size: 12px;
 }
 
-.topbarImg {
-  width: 32px;
-  height: 32px;
-  border: 2px solid rgb(224, 223, 223);
-  border-radius: 50%;
-  object-fit: cover;
-  cursor: pointer;
-}
-
-.linkList {
-  top: 40px;
-  right: 30px;
-  width: 200px;
-  height: 210px;
-  position: absolute;
-  line-height: 2rem;
-  display: flex;
-  padding: 5px;
-  background-color: white;
-  flex-direction: column;
-  box-shadow: 0 1px 3px 1px rgb(116, 114, 114);
-  border-radius: 5px;
-}
-
-.linktoggle {
-  display: none;
-}
-
-.linktoggle.active {
-  display: block;
-}
-
 .linkListprofile {
   color: #000;
-  padding-left: 5px;
   border-radius: 3px;
-  border-bottom: 1px solid rgba(44, 44, 44, 0.363);
+  border-bottom: 1px solid #2c2c2c5d;
   text-decoration: none;
 }
 
@@ -230,17 +146,16 @@
   outline: none;
   border: none;
   text-align: left;
-  border-top: 1px solid rgba(44, 44, 44, 0.363);
+  border-top: 1px solid #2c2c2c5d;
   text-decoration: none;
   background-color: white;
 }
 
 .styleLink {
-  padding: 10px 7px;
+  padding: 10px;
   margin-left: 10px;
   border: 2px solid #3a8fde;
   color: #3a8fde;
-  font-weight: 500;
   text-decoration: none;
   border-radius: 5px;
   margin-right: 10px;
@@ -264,7 +179,7 @@
   background-color: white;
   width: 100%;
   top: 54px;
-  border-bottom: 1px solid rgba(99, 97, 97, 0.295);
+  border-bottom: 1px solid #6361614b;
 }
 
 .SearchBoxWrapers {
@@ -281,10 +196,6 @@
   border-radius: 5px;
   flex-direction: column;
 }
-
-/* .SearchBoxPopUp.searchboxact {
-  display: block;
-} */
 
 .SearchPopUpInputBox {
   width: 90%;
@@ -313,7 +224,7 @@
   border-radius: 5px;
   flex-direction: column;
   position: absolute;
-  top: 40px;
+  top: 50px;
 }
 
 .searchNameLinks {
@@ -324,17 +235,13 @@
   margin: 0 1px;
 }
 
-.noneInLarge {
-  display: none;
-}
-
 .responsive {
   padding: 6px 15px;
 }
 
 .searchNameLinks:hover {
-  outline: 1px solid rgb(136, 182, 243);
-  color: rgb(61, 137, 238);
+  outline: 1px solid #88b6f3;
+  color: #3d89ee;
 }
 
 /* Media Query */
@@ -356,13 +263,7 @@
   .logo {
     margin-left: 50px;
   }
-  .topbarIconItem {
-    margin-right: 12px;
-  }
   .topbarIcons {
     margin-right: 10px;
-  }
-  .menuBtn {
-    display: block;
   }
 }

@@ -1,13 +1,12 @@
-import { UPDATE_NOTIFY_SOCKET } from "../types";
+import { UPDATE_SOCKET } from "../types";
 
 const initialState = {
-  isConnected: false,
-  socket: null,
+  socket: { connected: false },
 };
 
 export default function notification(state = initialState, { type, payload }) {
   switch (type) {
-    case UPDATE_NOTIFY_SOCKET:
+    case UPDATE_SOCKET:
       return { ...state, ...payload };
     default:
       return state;

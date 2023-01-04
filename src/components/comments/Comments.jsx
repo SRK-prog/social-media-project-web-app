@@ -8,16 +8,18 @@ import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import Avatar from "@material-ui/core/Avatar";
 import Typography from "@material-ui/core/Typography";
 
-export default function Comments({ com, name }) {
+export default function Comments({ comment }) {
+  const { user } = comment;
+
   return (
     <div>
-      <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
+      <List sx={{ width: "100%", bgcolor: "background.paper" }}>
         <ListItem alignItems="flex-start">
           <ListItemAvatar>
-            <Avatar alt="Remy Sharp" src="" />
+            <Avatar alt="Remy Sharp" src={user?.profilepicture} />
           </ListItemAvatar>
           <ListItemText
-            primary={name}
+            primary={user?.username}
             secondary={
               <React.Fragment>
                 <Typography
@@ -26,7 +28,7 @@ export default function Comments({ com, name }) {
                   variant="body2"
                   color="text.primary"
                 >
-                  {com}
+                  {comment?.comment}
                 </Typography>
               </React.Fragment>
             }

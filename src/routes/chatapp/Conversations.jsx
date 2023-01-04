@@ -1,54 +1,112 @@
-import React, { useState, useEffect, useRef } from "react";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import { connect } from "react-redux";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { ArrowBack } from "@material-ui/icons";
+import { Link } from "react-router-dom";
 import Message from "../../components/message/Message";
 import BASE_URL from "../../api/URL";
+import { DEFAULT_AVATAR } from "../../constants/constants";
+import Utils from "../../utils";
 
 const Conversations = (props) => {
   const {
     onClose,
     currentChat,
     user,
-    socketChannel,
     receiverId,
     incomingMessage,
+    onSent,
+    socket,
   } = props;
   const [isOnline, setIsOnline] = useState(false);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-
-  const scrollRef = useRef();
-  // console.log("message: ", message);
+  const [justNowLeaved, setJustNowLeaved] = useState({
+    status: false,
+    lastSeen: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const loader = useRef(null);
+  const loadingStatus = useRef(true);
 
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    (async () => {
+      try {
+        updateLoading(true);
+        const { data } = await BASE_URL.get("/messages/" + currentChat?._id);
+        updateLoading(false);
+        setMessages(data);
+      } catch (error) {}
+    })();
+  }, [page]);
 
-  console.log('incomingMessage: ', incomingMessage)
+  const handleObserver = useCallback((entries) => {
+    const target = entries[0];
+    if (target.isIntersecting && !loadingStatus.current) {
+      setPage((prev) => prev + 1);
+    }
+  }, []);
+
+  useEffect(() => {
+    const option = {
+      root: null,
+      rootMargin: "30px",
+      threshold: 0,
+    };
+    const observer = new IntersectionObserver(handleObserver, option);
+    if (loader.current) observer.observe(loader.current);
+  }, [handleObserver]);
+
+  const scrollRef = useRef();
+
+  // useEffect(() => {
+  //   scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  // }, [messages]);
 
   useEffect(() => {
     setMessages((prev) => [
-      ...prev,
       { ...incomingMessage, _id: Date.now(), conversationId: currentChat._id },
+      ...prev,
     ]);
+    // eslint-disable-next-line
   }, [incomingMessage]);
+
+  useEffect(() => {
+    if (socket.connected) {
+      socket.on("user_disconnect", (data) => {
+        const isCurrentUserChat = data.offline === receiverId;
+        setJustNowLeaved({
+          status: isCurrentUserChat,
+          lastSeen: Date.now(),
+        });
+        setIsOnline((prev) => (isCurrentUserChat ? false : prev));
+      });
+      socket.on("user_status", (data) => {
+        setIsOnline((prev) => (data.online === receiverId ? true : prev));
+      });
+    }
+    // eslint-disable-next-line
+  }, [socket.connected]);
+
+  const updateLoading = (value) => {
+    setLoading(value);
+    loadingStatus.current = value;
+  };
 
   useEffect(() => {
     if (!currentChat?._id) return;
     (async () => {
       try {
-        const { data } = await BASE_URL.get("/messages/" + currentChat?._id);
-        setMessages(data);
-        const resp = await socketChannel.socket.getUserStatus({
-          id: receiverId,
+        socket.emit("user_status", { id: receiverId }, ({ response }) => {
+          setIsOnline(response?.online);
         });
       } catch (err) {
+        updateLoading(false);
         console.log(err);
       }
     })();
-    return () => socketChannel.socket.removeTracker({ id: receiverId });
+    return () => socket.emit("remove_tracker", { id: receiverId }, () => {});
     // eslint-disable-next-line
-  }, [currentChat?._id, socketChannel?.isConnected]);
+  }, [currentChat?._id, socket.connected]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,17 +115,26 @@ const Conversations = (props) => {
       text: newMessage,
       conversationId: currentChat._id,
     };
+    onSent({ text: newMessage, sender: user._id, receiver: receiverId });
 
-    if (socketChannel?.isConnected) {
-      socketChannel.socket.sendMessage({
-        receiver: receiverId,
-        sender: user._id,
-        message: newMessage,
-      });
+    if (socket.connected) {
+      socket.emit(
+        "message",
+        {
+          receiver: receiverId,
+          sender: user._id,
+          text: newMessage,
+          createdAt: Date.now(),
+        },
+        () => {}
+      );
     }
 
     try {
-      setMessages([...messages, { ...message, _id: Date.now() }]);
+      setMessages([
+        { ...message, _id: Date.now(), createdAt: Date.now() },
+        ...messages,
+      ]);
       setNewMessage("");
       await BASE_URL.post("/messages", message);
     } catch (err) {
@@ -75,23 +142,52 @@ const Conversations = (props) => {
     }
   };
 
+  const userStatus = () => {
+    return isOnline
+      ? "online"
+      : `Last seen ${
+          justNowLeaved.status
+            ? Utils.formatDate(justNowLeaved?.lastSeen)
+            : Utils.formatDate(currentChat?.lastSeen)
+        }`;
+  };
+
   return (
     <>
-      <div className="chatBoxTop">
-        <div className="DoNotMsg">
-          Do not share any personal information in chat because I'm watching it
+      {currentChat && (
+        <div className="flex items-cente px-5 py-1.5 bg-gray-20">
+          <button className="px-1.5">
+            <ArrowBack onClick={onClose} />
+          </button>
+          <Link
+            className="flex gap-4 items-center"
+            to={`/profile/${currentChat?.username}`}
+          >
+            <img
+              className="w-10 h-10 object-cover rounded-full"
+              src={currentChat?.profilepicture || DEFAULT_AVATAR}
+              alt=""
+            />
+            <div className="font-medium">
+              <div className="md:text-lg font-semibold text-base">
+                {currentChat?.username}
+              </div>
+              <div className="md:text-sm text-xs">{userStatus()}</div>
+            </div>
+          </Link>
         </div>
-        {currentChat && (
-          <div className="ChatNavItems">
-            <ArrowBackIcon onClick={onClose} />
-          </div>
-        )}
+      )}
+      <div className="chatBoxTop py-4 custom-scrollbar flex flex-col-reverse">
+        <div ref={scrollRef}></div>
         {messages.map((m) => (
           <div className="px-4" key={m._id}>
             <Message message={m} own={m.sender === user._id} />
           </div>
         ))}
-        <div ref={scrollRef}></div>
+        <div ref={loader} />
+        <div className="DoNotMsg">
+          Do not share any personal information in chat because I'm watching you
+        </div>
       </div>
       <form onSubmit={handleSubmit} className="px-4 mb-3 flex gap-4 h-12">
         <input
@@ -112,8 +208,4 @@ const Conversations = (props) => {
   );
 };
 
-const mapStateToProps = (state) => ({
-  socketChannel: state.notificationSocket,
-});
-
-export default connect(mapStateToProps)(Conversations);
+export default Conversations;

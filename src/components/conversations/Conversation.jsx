@@ -8,8 +8,8 @@ const formatText = (conv, curtUserId) => {
   return conv?.text;
 };
 
-function Conversation({ conversation, currentUser, isActive }) {
-  const [user, setUser] = useState([]);
+function Conversation({ conversation, currentUser, isActive, onSelect }) {
+  const [user, setUser] = useState({});
 
   useEffect(() => {
     const friendId = conversation.members.find((m) => m !== currentUser._id);
@@ -28,13 +28,14 @@ function Conversation({ conversation, currentUser, isActive }) {
 
   return (
     <div
+      onClick={() => onSelect({ ...user, ...conversation, userId: user?._id })}
       className={`flex items-center p-2.5 cursor-pointer hover:bg-gray-30 ${
         isActive && "bg-gray-20"
       }`}
     >
       <img
         className="w-10 h-10 object-cover mr-5 rounded-full"
-        src={user?.profilepicture ? user.profilepicture : DEFAULT_AVATAR}
+        src={user.profilepicture || DEFAULT_AVATAR}
         alt=""
       />
       <div className="font-medium">

@@ -1,26 +1,25 @@
+import { useContext, useEffect, useState, useRef } from "react";
 import ScheduleIcon from "@material-ui/icons/Schedule";
 import RoomIcon from "@material-ui/icons/Room";
-import { useContext, useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router";
 import { useHistory } from "react-router-dom";
 import "./profile.css";
 import Sidebar from "../../components/sidebar/Sidebar";
 import { Context } from "../../context/Context";
-import { DEFAULT_AVATAR } from "../../constants/constants";
+import { PROFILE_AVATAR } from "../../constants/constants";
 import BASE_URL from "../../api/URL";
 import Cards from "../../components/cards/Cards";
 
 export default function Profile() {
-  const [details, setProfileDetails] = useState({});
+  const [profle, setProfle] = useState({});
   const [follow, setfollow] = useState([]);
-  const [id, setId] = useState();
+  const [id, setId] = useState("");
   const [isfollowed, setIsfollowed] = useState(false);
   const [followings, setfollowings] = useState([]);
-  const [desc, setdesc] = useState();
-  const [name, setName] = useState();
-  const [city, setCity] = useState();
-  const [time, setTime] = useState();
+  const [desc, setdesc] = useState("");
+  const [city, setCity] = useState("");
+  const [time, setTime] = useState("");
   const [Isfollowing, setIsfollowing] = useState();
   const [picture, setPicture] = useState();
   const [posts, setUserposts] = useState([]);
@@ -33,8 +32,10 @@ export default function Profile() {
   const scrollToRef = (ref) => window.scrollTo(0, ref.current.offsetTop);
 
   useEffect(() => {
-    document.title = name ? `${name} | Mern` : "Profile | Mern";
-  }, [name]);
+    document.title = profle?.username
+      ? `${profle?.username} | Mern`
+      : "Profile | Mern";
+  }, [profle?.username]);
 
   // Follow Feature
   const followHandler = () => {
@@ -42,19 +43,21 @@ export default function Profile() {
       BASE_URL.put("/users/" + id + "/follow", {
         userId: currentUser._id,
       });
-      if (!isfollowed) {
-        if (!Isfollowing) {
-          try {
-            BASE_URL.post("/conversations", {
-              senderId: currentUser._id,
-              receiverId: id,
-            });
-          } catch (err) {}
+      if (!isfollowed && !Isfollowing) {
+        try {
+          BASE_URL.post("/conversations", {
+            senderId: currentUser._id,
+            receiverId: id,
+          });
+        } catch (err) {
+          throw err;
         }
       } else if (!Isfollowing) {
         BASE_URL.delete(`/conversations/delete/${currentUser._id}/${id}`);
       }
-    } catch (err) {}
+    } catch (err) {
+      console.log("follow feature error: ", err);
+    }
     setfollow(isfollowed ? follow - 1 : follow + 1);
     setIsfollowed(!isfollowed);
   };
@@ -63,8 +66,7 @@ export default function Profile() {
   useEffect(() => {
     BASE_URL.get(`/users/${path}`)
       .then(({ data }) => {
-        setProfileDetails(data);
-        setName(data.username);
+        setProfle(data);
         setdesc(data.desc);
         setCity(data.city);
         setTime(data.createdAt);
@@ -91,7 +93,7 @@ export default function Profile() {
   }, [path]);
 
   return (
-    <div className="ProfileFlexBox">
+    <div className="ProfileFlexBox max-w-360 mx-auto">
       <div className="DisplayNoneSidebar">
         <Sidebar />
       </div>
@@ -100,7 +102,7 @@ export default function Profile() {
         <div>
           <img
             className="ProfileImage"
-            src={picture ? picture : DEFAULT_AVATAR}
+            src={picture ? picture : PROFILE_AVATAR}
             alt=""
           />
           {desc && <div style={{ height: "25px" }}></div>}
@@ -130,36 +132,34 @@ export default function Profile() {
             </div>
             <div className="UserInfo">
               <div className="UserName">
-                <h2>{details?.username}</h2>
-                <p>@{details?.username}</p>
+                <h2>{profle?.username}</h2>
+                <p>@{profle?.username}</p>
               </div>
               <div className="BtnWrper">
-                <div className="BtnSection">
-                  <div className="FollowBtn">
-                    {name !== currentUser?.username && (
+                {profle?._id !== currentUser?._id && (
+                  <div className="BtnSection">
+                    <div className="FollowBtn">
                       <div>
                         {isfollowed ? (
-                          <span
+                          <button
                             className="followingbutton"
                             onClick={followHandler}
                           >
                             Following
-                          </span>
+                          </button>
                         ) : (
-                          <span
+                          <button
                             className={
                               !Isfollowing ? "followbutton" : "followbackbutton"
                             }
                             onClick={followHandler}
                           >
-                            {Isfollowing ? "FollowBack" : "Follow"}
-                          </span>
+                            {Isfollowing ? "Follow back" : "Follow"}
+                          </button>
                         )}
                       </div>
-                    )}
-                  </div>
-                  <div className="FollowBtn">
-                    {name !== currentUser?.username && (
+                    </div>
+                    <div className="FollowBtn">
                       <Link
                         to="/chat"
                         className="LinkBtn"
@@ -167,13 +167,12 @@ export default function Profile() {
                       >
                         Messege
                       </Link>
-                    )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
             <div className="DescContainer">
-              {" "}
               {desc && <div className="UserAbout">{desc}</div>}
             </div>
             <div className="JoinDate">

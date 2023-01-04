@@ -11,20 +11,10 @@
   width: 95%;
 }
 
-.writepost-img {
-  object-fit: cover;
-  width: 100%;
-  border-radius: 5px;
-}
-
 .WriteRightFlex {
   flex: 2;
 }
 
-.InputBoxWrapper {
-  display: flex;
-  align-items: center;
-}
 
 .InputWriteImger {
   display: flex;
@@ -32,7 +22,7 @@
   justify-content: center;
   cursor: pointer;
   padding-top: 8px;
-  color: rgb(77, 74, 74);
+  color: #4d4a4a;
   font-weight: 900;
   margin-left: 15px;
 }
@@ -41,24 +31,6 @@
   margin-left: 10px;
   padding-top: 8px;
   color: rgb(6, 175, 6);
-}
-
-.LoadingMsg {
-  margin-left: 10px;
-  padding-top: 8px;
-}
-
-.LoadingMsg {
-  animation: rotation 1s infinite linear;
-}
-
-@keyframes rotation {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(-359deg);
-  }
 }
 
 .FailedMsg {
@@ -106,7 +78,7 @@
 }
 
 .InputWriteImger:hover {
-  color: rgb(87, 177, 238);
+  color: #57b1ee;
 }
 
 @media only screen and (max-width: 900px) {

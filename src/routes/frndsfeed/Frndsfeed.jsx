@@ -24,7 +24,7 @@ function Frndsfeed({ posts, fetchFriendsPosts }) {
   const RenderFrndsPosts = () => {
     if (posts.length === 0) {
       return (
-        <div style={{ display: "flex", flexDirection: "column", flex: "6" }}>
+        <div className="flex flex-col flex-[6.5] md:px-0 px-2 mt-1.25">
           <Navlinks />
           {[1, 2, 3, 4, 5].map((i) => (
             <Skeleton key={i} />
@@ -52,7 +52,7 @@ function Frndsfeed({ posts, fetchFriendsPosts }) {
   };
 
   return (
-    <div className="FrndsfeedFlex">
+    <div className="FrndsfeedFlex max-w-360 mx-auto">
       <Sidebar />
       {RenderFrndsPosts()}
       <Rightbox />

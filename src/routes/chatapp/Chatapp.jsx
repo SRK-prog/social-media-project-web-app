@@ -7,41 +7,40 @@ import Loader from "../../common/components/loader";
 import Conversations from "./Conversations";
 import { connect } from "react-redux";
 
-function Chatapp({ socketChannel }) {
+document.title = "Chat | Mern";
+
+function Chatapp({ socket }) {
   const [conversations, setConversations] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [incomingMessage, setIncomingMessage] = useState({});
   const { user } = useContext(Context);
 
-  // useEffect(() => {
-
-  // }, []);
-
-  console.log("conversations: ", conversations);
+  const addSortConversations = (data) => {
+    setConversations((prev) => {
+      const temp = prev.map((i) =>
+        i.members.includes(data?.sender)
+          ? { ...i, text: data?.text, sender: data?.sender }
+          : i
+      );
+      return temp.sort((x, y) =>
+        x.members.includes(data?.sender)
+          ? -1
+          : y.members.includes(data?.sender)
+          ? 1
+          : 0
+      );
+    });
+  };
 
   const handleOnMessage = () => {
-    if (!socketChannel?.isConnected) return;
+    if (!socket?.connected) return;
     try {
-      window.socket.on("message", (data) => {
-        const message = {
-          sender: data?.sender,
-          text: data?.message,
-        };
-        console.log("data: ", data);
-        setIncomingMessage(message);
-        setConversations((prev) => {
-          const temp = prev.map((i) =>
-            i.members.includes(data?.sender) ? { ...i, text: data?.message } : i
-          );
-          return temp.sort((x, y) => {
-            return x.members.includes(data?.sender)
-              ? -1
-              : y.members.includes(data?.sender)
-              ? 1
-              : 0;
-          });
-        });
+      socket.on("message", (data) => {
+        addSortConversations(data);
+        if (currentChat?.members?.includes(data?.sender)) {
+          setIncomingMessage(data);
+        }
       });
     } catch (error) {
       console.error("error handleOnMessage: ", error);
@@ -50,10 +49,10 @@ function Chatapp({ socketChannel }) {
 
   useEffect(() => {
     handleOnMessage();
-  }, [socketChannel?.isConnected]);
+    // eslint-disable-next-line
+  }, [socket?.connected, currentChat?.members]);
 
   useEffect(() => {
-    document.title = "Chat | Mern";
     (async () => {
       try {
         setIsLoading(true);
@@ -82,13 +81,13 @@ function Chatapp({ socketChannel }) {
         <div className={`chatMenu ${!currentChat && "ChatmenuActive"}`}>
           <div className="h-full">
             {conversations.map((c) => (
-              <div key={c._id} onClick={() => setCurrentChat(c)}>
-                <Conversation
-                  isActive={isActiveConversation(c.members)}
-                  conversation={c}
-                  currentUser={user}
-                />
-              </div>
+              <Conversation
+                key={c._id}
+                onSelect={setCurrentChat}
+                isActive={isActiveConversation(c.members)}
+                conversation={c}
+                currentUser={user}
+              />
             ))}
           </div>
         </div>
@@ -98,11 +97,9 @@ function Chatapp({ socketChannel }) {
             {currentChat ? (
               <Conversations
                 user={user}
-                incomingMessage={
-                  currentChat?.members?.includes(incomingMessage?.sender)
-                    ? incomingMessage
-                    : ""
-                }
+                socket={socket}
+                incomingMessage={incomingMessage}
+                onSent={addSortConversations}
                 receiverId={currentChat?.members.find((i) => i !== user._id)}
                 currentChat={currentChat}
                 onClose={() => setCurrentChat(null)}
@@ -127,7 +124,7 @@ function Chatapp({ socketChannel }) {
 }
 
 const mapStateToProps = (state) => ({
-  socketChannel: state.notificationSocket,
+  socket: state.socket.socket,
 });
 
 export default connect(mapStateToProps)(Chatapp);

@@ -20,13 +20,15 @@ const Nonusercard = ({ post, fetchUser, userInfo }) => {
           <div>
             <img
               className="Nonprofile-img"
-              src={userInfo?.profilepicture ? userInfo?.profilepicture : DEFAULT_AVATAR}
+              src={userInfo?.profilepicture || DEFAULT_AVATAR}
               alt=""
             />
           </div>
           <div className="NonNameDate">
             <div className="NonpostUserdate">{post.username}</div>
-            <div className="NonpostDate">{moment(post.createdAt).fromNow()}</div>
+            <div className="NonpostDate">
+              {moment(post.createdAt).fromNow()}
+            </div>
           </div>
         </span>
       </div>
@@ -36,7 +38,7 @@ const Nonusercard = ({ post, fetchUser, userInfo }) => {
       <div>
         <span>
           <div className="NonPostTitle">{post.title}</div>
-          <div className="NonPostDesc">{post.desc}</div>
+          <div className="NonPostDesc">{post.description}</div>
         </span>
       </div>
       <div className="resIcons">
@@ -47,7 +49,6 @@ const Nonusercard = ({ post, fetchUser, userInfo }) => {
           </span>
           <span className="LikeShare">
             <ModeCommentOutlinedIcon />
-            <span style={{ marginLeft: "3px" }}>{post.comments.length}</span>
           </span>
         </div>
         <div className="shareIcon">

@@ -8,11 +8,7 @@
   border-radius: 5px;
   padding: 10px 0;
   background-color: white;
-  border: 1px solid rgb(192, 190, 190);
-}
-
-.ActiveLink {
-  font-weight: bolder;
+  border: 1px solid #c0bebe;
 }
 
 .ActiveLinkFeed {
@@ -59,11 +55,6 @@
   font-size: 0.7rem;
 }
 
-.img-name-box {
-  text-decoration: none;
-  display: flex;
-}
-
 .main-pic {
   object-fit: cover;
   max-height: 370px;
@@ -103,10 +94,6 @@
   color: #000;
   margin-left: 3%;
   margin-right: 3%;
-}
-
-.Alink {
-  text-decoration: none;
 }
 
 .PostDesc {

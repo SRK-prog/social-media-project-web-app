@@ -1,10 +1,6 @@
-.SettingsFlexBox {
-  display: flex;
-}
-
 .SettingsContainer {
   position: relative;
-  flex: 5;
+  flex: 7;
 }
 
 .SetWrapper {
@@ -12,15 +8,11 @@
   border-radius: 5px;
   margin: 25px auto;
   width: 95%;
-  border: 1px solid rgb(139, 138, 138);
+  border: 1px solid #8b8a8a;
 }
 
 .SetUser {
   margin-bottom: 23px;
-}
-
-.SettingsRightFlex {
-  flex: 2;
 }
 
 .ForInputGap {
@@ -36,16 +28,13 @@
   margin-right: 15px;
   width: 50px;
   height: 50px;
-  border: 2px solid rgb(224, 223, 223);
+  border: 2px solid #e0dfdf;
   border-radius: 50%;
   object-fit: cover;
   cursor: pointer;
 }
 
 @media only screen and (max-width: 900px) {
-  .SettingsRightFlex {
-    display: none;
-  }
   .SetWrapper {
     width: 100%;
   }

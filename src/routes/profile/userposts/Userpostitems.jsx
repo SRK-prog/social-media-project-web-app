@@ -14,7 +14,6 @@ const CardItem = ({ post }) => {
   const [like, setLike] = useState(post.likes.length);
   const [isLiked, setIsLiked] = useState(false);
   const { user: currentUser } = useContext(Context);
-  const [userprof, setUserProf] = useState({});
 
   useEffect(() => {
     setIsLiked(post.likes.includes(currentUser._id));
@@ -30,14 +29,6 @@ const CardItem = ({ post }) => {
     setIsLiked(!isLiked);
   };
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const res = await BASE_URL.get(`/users?userId=${post.userId}`);
-      setUserProf(res.data.profilepicture);
-    };
-    fetchUser();
-  }, [post.userId]);
-
   return (
     <div className="main-container">
       <div className="profile-container">
@@ -45,12 +36,12 @@ const CardItem = ({ post }) => {
           <div>
             <img
               className="profile-img"
-              src={userprof ? userprof : DEFAULT_AVATAR}
+              src={post.user.profilepicture || DEFAULT_AVATAR}
               alt=""
             />
           </div>
           <div className="NameDate">
-            <div className="postUserdate">{post.username}</div>
+            <div className="postUserdate">{post.user.username}</div>
             <div className="postDate">{moment(post.createdAt).fromNow()}</div>
           </div>
         </span>

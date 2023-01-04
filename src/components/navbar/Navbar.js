@@ -1,235 +1,149 @@
-import React, { useState, useEffect } from "react";
-import OutsideClickHandler from "react-outside-click-handler";
+import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
-import { NavLink } from "react-router-dom";
-import { useContext } from "react";
-import { Search, Chat } from "@material-ui/icons";
-import { Close } from "@material-ui/icons";
+import { Search, Close, Menu } from "@material-ui/icons";
 import "./Navbar.css";
-import MenuIcon from "@material-ui/icons/Menu";
 import { Context } from "../../context/Context";
 import Menubar from "../sidebar/menubar/Menubar";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 import BASE_URL from "../../api/URL";
+import MobSearchDropdown from "./mobSearchDropdown";
+import ClickOutside from "../../common/components/clickOutside";
+import MenusDropdown from "./menusDropdown";
 
 export default function Navbar() {
-  const [profilebtn, setProfilebtn] = useState(false);
-  const [navmenu, setNavmenu] = useState(false);
-  const [search, setSearchbox] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const [searchterm, setSearchterm] = useState("");
   const [searchdata, setSearchdata] = useState([]);
 
-  const searchboxtoggle = () => {
-    setSearchbox(!search);
-  };
-
-  const NavmenuBtn = () => {
-    setNavmenu(!navmenu);
-  };
-
-  const clicktoggle = () => {
-    setProfilebtn(!profilebtn);
-  };
+  const { user, dispatch } = useContext(Context);
 
   useEffect(() => {
+    if (!searchterm) return;
     const timeout = setTimeout(() => {
-      const fetchUser = async () => {
-        if (!searchterm) return;
+      (async () => {
         const { data } = await BASE_URL.get("/search", {
           params: { username: searchterm },
         });
         setSearchdata(data);
-      };
-      fetchUser();
+      })();
     }, 500);
-    return () => {
-      clearTimeout(timeout);
-    };
+    return () => clearTimeout(timeout);
   }, [searchterm]);
 
-  const { user, dispatch } = useContext(Context);
-  const handlelogout = () => {
-    dispatch({ type: "LOGOUT" });
-  };
-  return (
-    <>
-      <div className="topbarContainer">
-        <div className="max-w-360 mx-auto flex items-center w-full">
-          <div className="topbarLeft">
-            <OutsideClickHandler
-              onOutsideClick={() => {
-                setNavmenu(false);
-              }}
-            >
-              {" "}
-              <div onClick={() => setNavmenu(false)}>
-                <Menubar data={navmenu} />
-              </div>
-              <button className="menuBtn" onClick={NavmenuBtn}>
-                <MenuIcon />
-              </button>
-            </OutsideClickHandler>
+  const handlelogout = () => dispatch({ type: "LOGOUT" });
 
-            <Link to="/" className="logo">
-              <span>M</span>
-              <span className="LogoLists">
-                <div className="LogoList">
-                  <h1>ern</h1>
-                </div>
-                <div className="LogoList">
-                  <h1>edia</h1>
-                </div>
-              </span>
+  return (
+    <div className="topbarContainer md:px-5">
+      <div className="max-w-360 mx-auto flex items-center justify-between w-full">
+        <div className="flex items-center">
+          <div className="flex items-center justify-center gap-3">
+            <button
+              className="text-gray-60 select-none md:hidden"
+              onClick={() => setShowSidebar((p) => !p)}
+            >
+              <Menu />
+            </button>
+            <Link
+              to="/"
+              className="font-bold md:text-xl text-lg px-2 md:h-12 h-10 gap-2 text-white cursor-pointer bg-black-0 rounded flex items-center"
+            >
+              <div>Social</div>
+              <div>Media</div>
             </Link>
+            <ClickOutside isOpen={showSidebar} onClickOutside={setShowSidebar}>
+              <Menubar showSidebar={showSidebar} onClose={setShowSidebar} />
+            </ClickOutside>
           </div>
           <div className="topbarCenter">
-            <div className="searchbar display_none">
+            <div className="searchbar display_none h-12">
               {searchterm ? "" : <Search className="searchIcon" />}
               <input
                 placeholder="Search..."
                 className="searchInput"
                 value={searchterm}
-                onChange={(e) => {
-                  setSearchterm(e.target.value.toLowerCase());
-                }}
+                onChange={(e) => setSearchterm(e.target.value.toLowerCase())}
               />
-              {searchterm && (
+              {!!searchdata?.length && !!searchterm && (
                 <div className="searchNameLinksCon">
-                  {searchdata.map((data) => (
+                  {searchdata.map(({ username }, idx) => (
                     <Link
+                      key={idx}
                       onClick={() => setSearchterm("")}
                       className="searchNameLinks"
-                      to={`/profile/${data?.username}`}
+                      to={`/profile/${username}`}
                     >
-                      {data?.username}
+                      {username}
                     </Link>
                   ))}
                 </div>
               )}
             </div>
           </div>
-          <div className="topbarRight">
-            <div className="topbarLinks">
-              {user ? (
-                <>
-                  <Link to="/write" className="styleLink display_none">
-                    Create Post
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link to="/login" className="topbarLink display_none">
-                    Log in
-                  </Link>
-                  <Link to="/signup" className="styleLink">
-                    Create account
-                  </Link>
-                </>
-              )}
-            </div>
+        </div>
+        <div className="topbarRight">
+          <div className="topbarLinks">
             {user ? (
-              <div className="topbarIcons">
-                <div className="topbarIconItemSearch">
-                  {!search ? (
-                    <Search className="Icon" onClick={searchboxtoggle} />
-                  ) : (
-                    <Close className="Icon" onClick={searchboxtoggle} />
-                  )}
-                </div>
-                <NavLink
-                  to="/chat"
-                  className="topbarIconItem"
-                  activeClassName="None_chatIcon"
-                >
-                  <Chat className="Icon" />
-                </NavLink>
-                <OutsideClickHandler
-                  onOutsideClick={() => {
-                    setProfilebtn(false);
-                  }}
-                >
-                  <div className="topbarIconItem">
-                    <img
-                      src={user.profilepicture || DEFAULT_AVATAR}
-                      alt=""
-                      className="topbarImg"
-                      onClick={clicktoggle}
-                    />
-                  </div>
-                  <div onClick={() => setProfilebtn(false)}>
-                    <div className={`linktoggle ${profilebtn ? "active" : ""}`}>
-                      <ul className="linkList">
-                        <Link
-                          to={`/profile/${user.username}`}
-                          className="linkListprofile"
-                        >
-                          <div style={{ fontSize: "1.2rem" }}>
-                            {user?.username}
-                          </div>
-                          <div style={{ fontSize: ".8rem" }}>
-                            @{user?.username}
-                          </div>
-                        </Link>
-                        <Link to="/write" className="linkListItems">
-                          Create post
-                        </Link>
-                        <Link to="/settings" className="linkListItems">
-                          Settings
-                        </Link>
-                        <button className="linkListbtn" onClick={handlelogout}>
-                          Sign Out
-                        </button>
-                      </ul>
-                    </div>
-                  </div>
-                </OutsideClickHandler>
-              </div>
+              <Link
+                to="/write"
+                className="styleLink display_none duration-200 font-bold"
+              >
+                Create Post
+              </Link>
             ) : (
-              ""
+              <>
+                <Link to="/login" className="topbarLink display_none">
+                  Log in
+                </Link>
+                <Link to="/signup" className="styleLink">
+                  Create account
+                </Link>
+              </>
             )}
           </div>
-          {search && (
-            <div className="SearchBoxPopUp noneInLarge">
-              <div className="SearchBoxWrapers">
-                <span className="SearchPopUpInputBox">
-                  <input
-                    type="text"
-                    className="SearchPopUpInput"
-                    placeholder="Search..."
-                    value={searchterm}
-                    // onClick={searchhandle}
-                    onChange={(e) => {
-                      setSearchterm(e.target.value.toLowerCase());
-                    }}
+          {user && (
+            <div className="topbarIcons">
+              <div className="topbarIconItemSearch">
+                {!showSearch ? (
+                  <Search
+                    className="Icon"
+                    onClick={() => setShowSearch(true)}
                   />
-                </span>
-                <span>
-                  <Search className="SearchPopUpBtn" />
-                </span>
+                ) : (
+                  <Close
+                    className="Icon"
+                    onClick={() => setShowSearch(false)}
+                  />
+                )}
               </div>
-              <div>
-                {searchterm && (
-                  <div className="searchNameLinksCon">
-                    {searchdata.map((name) => (
-                      <Link
-                        className="searchNameLinks responsive"
-                        onClick={() => {
-                          setSearchterm("");
-                          setSearchbox(false);
-                        }}
-                        to={`/profile/${name}`}
-                      >
-                        {name}
-                      </Link>
-                    ))}
-                  </div>
+              <div className="topbarIconItem">
+                <img
+                  src={user.profilepicture || DEFAULT_AVATAR}
+                  alt=""
+                  className="w-9 h-9 rounded-full object-cover"
+                  onClick={() => setShowMenu((p) => !p)}
+                />
+                {showMenu && (
+                  <MenusDropdown
+                    onLogout={handlelogout}
+                    user={user}
+                    onClose={setShowMenu}
+                  />
                 )}
               </div>
             </div>
           )}
         </div>
+        {showSearch && (
+          <MobSearchDropdown
+            value={searchterm}
+            onChange={setSearchterm}
+            data={searchdata}
+            onClose={setShowSearch}
+          />
+        )}
       </div>
-      <div style={{ height: "55px" }}></div>
-    </>
+    </div>
   );
 }

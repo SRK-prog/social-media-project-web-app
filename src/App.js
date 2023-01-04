@@ -1,103 +1,120 @@
-import { useEffect } from "react";
+import { useEffect, useContext, lazy, Suspense } from "react";
 import {
   BrowserRouter as Router,
   Switch,
   Route,
   Redirect,
 } from "react-router-dom";
-import { useContext } from "react";
 import { connect } from "react-redux";
-import Home from "./routes/home/Home";
+import { io } from "socket.io-client";
+import Loader from "./common/components/loader";
 import Navbar from "./components/navbar/Navbar";
-import SinglePost from "./routes/singlePost/SinglePost";
-import Register from "./routes/register/Register";
-import Login from "./routes/login/Login";
-import Write from "./routes/write/Write";
 import { Context } from "./context/Context";
-import Profile from "./routes/profile/Profile";
-import Settings from "./routes/settings/Settings";
-import Frndsfeed from "./routes/frndsfeed/Frndsfeed";
-import Error404 from "./routes/errors/Error404";
-import Contact from "./routes/contact/Contact";
-import Chatapp from "./routes/chatapp/Chatapp";
-import About from "./routes/about/About";
-import SocketService from "./services/socketService";
 import Utils from "./utils";
 import { actionTypes } from "./constants/constants";
 import BASE_URL from "./api/URL";
 
-const socket = new SocketService();
+const Home = lazy(() => import("./routes/home/Home"));
+const SinglePost = lazy(() => import("./routes/singlePost/SinglePost"));
+const Register = lazy(() => import("./routes/register/Register"));
+const Login = lazy(() => import("./routes/login/Login"));
+const Write = lazy(() => import("./routes/write/Write"));
+const Profile = lazy(() => import("./routes/profile/Profile"));
+const Frndsfeed = lazy(() => import("./routes/frndsfeed/Frndsfeed"));
+const Error404 = lazy(() => import("./routes/errors/Error404"));
+const Contact = lazy(() => import("./routes/contact/Contact"));
+const Settings = lazy(() => import("./routes/settings/Settings"));
+const Chatapp = lazy(() => import("./routes/chatapp/Chatapp"));
+const About = lazy(() => import("./routes/about/About"));
 
-const { UPDATE_NOTIFY_SOCKET } = actionTypes;
+const { UPDATE_SOCKET } = actionTypes;
 
-function App({ dispatch }) {
+function App({ dispatch, socket }) {
   const { user } = useContext(Context);
-
-  const receiveNotifications = async () => {
-    try {
-      await Utils.requestNotificationAccess();
-      socket.onMessage(async ({ sender, message }) => {
-        if (window.location.pathname === "/chat") return;
-        const { data } = await BASE_URL.get("/users", {
-          params: { userId: sender },
-        });
-        Utils.openNotification({
-          title: data?.username,
-          message: message,
-          icon: data?.profilepicture,
-        });
-      });
-    } catch (err) {
-      console.warn("Notification error", err);
-    }
-  };
 
   useEffect(() => {
     (async () => {
-      if (!user?._id) return;
       try {
-        await socket.connect("http://localhost:5005/chat", {
-          query: { id: user?._id },
-        });
-        await socket.join();
-        dispatch(UPDATE_NOTIFY_SOCKET, { socket, isConnected: true });
-        receiveNotifications();
-      } catch (error) {
-        console.error("error: ", error);
+        await Utils.requestNotificationAccess();
+        if (socket.connected) {
+          socket.on("message", async ({ sender, message }) => {
+            if (window.location.pathname === "/chat") return;
+            const { data } = await BASE_URL.get("/users", {
+              params: { userId: sender },
+            });
+            Utils.openNotification({
+              title: data?.username,
+              message: message,
+              icon: data?.profilepicture,
+            });
+          });
+        }
+      } catch (err) {
+        console.warn("Notification error", err);
       }
     })();
-    return () => socket.disconnect();
+    // eslint-disable-next-line
+  }, [socket.connected]);
+
+  const connect = async () => {
+    if (socket.connected) return;
+    const socketIo = io("http://localhost:5005/chat", {
+      query: { id: user?._id },
+    });
+    socketIo.once("connect", () => {
+      socketIo.emit("join", "", () => {});
+      dispatch(UPDATE_SOCKET, { socket: socketIo });
+    });
+    socketIo.once("connect_error", (err) => {
+      console.log("connect_error: ", err);
+    });
+    socketIo.once("connect_timeout", (err) => {
+      console.log("connect_timeout: ", err);
+    });
+  };
+
+  useEffect(() => {
+    if (user?._id) connect();
+    return () => {
+      if (socket?.connected) socket.disconnect();
+    };
     // eslint-disable-next-line
   }, [user?._id]);
 
   return (
     <Router>
       <Navbar />
-      <Switch>
-        <Route exact path="/" component={Home} />
-        <Route path="/login" component={Login} />
-        <Route path="/signup" component={Register} />
-        <Route path="/write" component={user ? Write : Register} />
-        <Route
-          path="/postdetails/:postId"
-          component={user ? SinglePost : Register}
-        />
-        <Route
-          path="/profile/:username"
-          component={user ? Profile : Register}
-        />
-        <Route path="/feeds" component={user ? Frndsfeed : Register} />
-        <Route path="/settings" component={user ? Settings : Register} />
-        <Route path="/error404" component={Error404} />
-        <Route path="/chat" component={user ? Chatapp : Register} />
-        <Route path="/contact" component={Contact} />
-        <Route path="/about" component={About} />
-        <Redirect exact from="*" to="/error404" />
-      </Switch>
+      <Suspense fallback={<Loader />}>
+        <Switch>
+          <Route exact path="/" component={Home} />
+          <Route path="/login" component={Login} />
+          <Route path="/signup" component={Register} />
+          <Route path="/write" component={user ? Write : Register} />
+          <Route
+            path="/postdetails/:postId"
+            component={user ? SinglePost : Register}
+          />
+          <Route
+            path="/profile/:username"
+            component={user ? Profile : Register}
+          />
+          <Route path="/feeds" component={user ? Frndsfeed : Register} />
+          <Route path="/settings" component={user ? Settings : Register} />
+          <Route path="/error404" component={Error404} />
+          <Route path="/chat" component={user ? Chatapp : Register} />
+          <Route path="/contact" component={Contact} />
+          <Route path="/about" component={About} />
+          <Redirect exact from="*" to="/error404" />
+        </Switch>
+      </Suspense>
     </Router>
   );
 }
 
+const mapStateToProps = (state) => ({
+  socket: state.socket.socket,
+});
+
 const dispatch = Utils.dispatch;
 
-export default connect(null, { dispatch })(App);
+export default connect(mapStateToProps, { dispatch })(App);
