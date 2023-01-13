@@ -16,7 +16,7 @@ import { useHistory } from "react-router-dom";
 import Sidebar from "../../components/sidebar/Sidebar";
 import { Context } from "../../context/Context";
 import Comments from "../../components/comments/Comments";
-import BASE_URL from "../../api/URL";
+import BASE_URL from "../../api/baseUrl";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 
 export default function SinglePost() {
@@ -118,19 +118,22 @@ export default function SinglePost() {
   return (
     <div className="page-container">
       <Sidebar />
-      <div className="flex-[6]">
-        <div className="smain-container">
-          <div className="sprofile-container">
-            <Link to={`/profile/${post.username}`} className="simg-name-box">
+      <div className="flex-[6] mb-10">
+        <div className="mt-2 rounded-lg bg-white border border-gray-100 py-2.5">
+          <div className="flex justify-between px-2.5 items-center">
+            <Link
+              to={`/profile/${post.username}`}
+              className="flex gap-2.5 pb-2"
+            >
               <div>
                 <img
-                  className="sprofile-img"
+                  className="h-10 w-10 object-cover rounded-full"
                   src={post.profilepicture || DEFAULT_AVATAR}
                   alt=""
                 />
               </div>
-              <div className="sNameDate">
-                <div className="spostUserdate">{post.username}</div>
+              <div>
+                <div className="">{post.username}</div>
                 <div className="spostDate">
                   {moment(post.createdAt).fromNow()}
                 </div>

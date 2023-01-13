@@ -14,46 +14,31 @@
   z-index: 999;
 }
 
-.searchbar {
-  width: 100%;
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
 .searchIcon {
   margin-left: 10px;
   width: 15px;
   height: 15px;
-  border-radius: 50%;
-  position: absolute;
-  top: 6px;
-  right: 4px;
   font-size: 12px;
 }
 
 .searchInput {
-  border: 1px solid rgb(75, 71, 71);
+  border: 1px solid #4b4747;
   width: 100%;
   margin-left: 10px;
   padding: 10px 7px;
   border-radius: 5px;
 }
 
-.searchInput:focus {
-  outline: none;
-}
-
 .Icon {
-  color: rgb(129, 125, 125) !important;
+  color: #817d7d !important;
   padding: 5px;
   font-size: 35px !important;
 }
 
 .Icon:hover {
-  background-color: rgb(129, 125, 125);
+  background-color: #817d7d;
   border-radius: 50%;
-  color: rgb(255, 255, 255) !important;
+  color: #ffffff !important;
 }
 
 .topbarRight {
@@ -72,17 +57,6 @@
 
 .topbarLink:hover {
   color: #3a8fde;
-}
-
-.topbarIcons {
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-.topbarIconItem {
-  cursor: pointer;
-  position: relative;
 }
 
 .topbarIconItemSearch {
@@ -168,12 +142,6 @@
   color: white;
 }
 
-.topbarLinks {
-  display: flex;
-  align-items: center;
-  font-family: 500;
-}
-
 .SearchBoxPopUp {
   position: absolute;
   background-color: white;
@@ -214,19 +182,6 @@
   border: 1px solid rgb(116, 114, 114);
 }
 
-.searchNameLinksCon {
-  display: flex;
-  background-color: white;
-  width: 100%;
-  padding: 5px 0;
-  margin: 0 0 0 5px;
-  box-shadow: 0 1px 5px -2px #000;
-  border-radius: 5px;
-  flex-direction: column;
-  position: absolute;
-  top: 50px;
-}
-
 .searchNameLinks {
   text-decoration: none;
   color: #000;
@@ -242,28 +197,4 @@
 .searchNameLinks:hover {
   outline: 1px solid #88b6f3;
   color: #3d89ee;
-}
-
-/* Media Query */
-
-@media only screen and (max-width: 700px) {
-  .display_none {
-    display: none;
-  }
-  .searchNameLinksCon {
-    top: 60px;
-    margin: 0 0 0 0;
-  }
-  .noneInLarge {
-    display: block;
-  }
-  .topbarIconItemSearch {
-    display: block;
-  }
-  .logo {
-    margin-left: 50px;
-  }
-  .topbarIcons {
-    margin-right: 10px;
-  }
 }

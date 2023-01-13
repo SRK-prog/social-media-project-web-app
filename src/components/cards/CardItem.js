@@ -1,4 +1,3 @@
-import "./Cards.css";
 import { Link, useHistory } from "react-router-dom";
 import moment from "moment";
 import FavoriteBorderOutlinedIcon from "@material-ui/icons/FavoriteBorderOutlined";
@@ -7,7 +6,7 @@ import ShareOutlinedIcon from "@material-ui/icons/ShareOutlined";
 import { Context } from "../../context/Context";
 import { useContext, useState, useEffect } from "react";
 import FavoriteIcon from "@material-ui/icons/Favorite";
-import BASE_URL from "../../api/URL";
+import BASE_URL from "../../api/baseUrl";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 import useSingleAndDoubleClick from "../../hooks/useSingleAndDoubleClick";
 
@@ -37,8 +36,8 @@ const CardItem = ({ post }) => {
   );
 
   return (
-    <div className="main-container">
-      <div className="profile-container">
+    <div className="mt-2 rounded-lg bg-white border border-gray-100 py-2.5">
+      <div className="px-3">
         <Link
           to={`/profile/${post?.user?.username}`}
           className="flex gap-2.5 pb-2"
@@ -52,22 +51,37 @@ const CardItem = ({ post }) => {
           </div>
           <div className="NameDate">
             <div className="postUserdate">{post?.user?.username}</div>
-            <div className="postDate">{moment(post.createdAt).fromNow()}</div>
+            <div className="text-darkGray-10 text-xs">
+              {moment(post.createdAt).fromNow()}
+            </div>
           </div>
         </Link>
       </div>
       <div onClick={handleOnPostClick}>
         <div>
-          {post.photo && <img className="main-pic" src={post.photo} alt="" />}
+          {post.photo && (
+            <img
+              className="md:max-h-92.5 max-h-77.5 w-full"
+              src={post.photo}
+              alt=""
+            />
+          )}
         </div>
-        <div>
-          <div className="PostTitle">{post?.title}</div>
-          <div className="PostDesc">{post?.description}</div>
+        <div className="md:px-6 px-4">
+          <div className="mt-2 md:text-3xl text-xl font-medium">
+            {post?.title}
+          </div>
+          <div className="text-black mt-2 mb-2 trucate-word">
+            {post?.description}
+          </div>
         </div>
       </div>
-      <div className="resIcons">
-        <div className="FlexLike">
-          <button onClick={likeHandler} className="LikeShare">
+      <div className="flex items-center justify-between md:px-6 px-4">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={likeHandler}
+            className="flex cursor-pointer items-center"
+          >
             {isLiked ? (
               <FavoriteIcon style={{ color: "red" }} />
             ) : (
@@ -75,15 +89,11 @@ const CardItem = ({ post }) => {
             )}
             <span>{like}</span>
           </button>
-          <Link
-            to={`/postdetails/${post._id}`}
-            style={{ textDecoration: "none", color: "black" }}
-            className="LikeShare"
-          >
+          <Link to={`/postdetails/${post._id}`}>
             <ModeCommentOutlinedIcon />
           </Link>
         </div>
-        <div className="shareIcon">
+        <div className="">
           <ShareOutlinedIcon />
         </div>
       </div>

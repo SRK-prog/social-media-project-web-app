@@ -4,7 +4,7 @@ import { Context } from "../../context/Context";
 import { Link } from "react-router-dom";
 import { Close } from "@material-ui/icons";
 import { useContext, useState, useEffect } from "react";
-import BASE_URL from "../../api/URL";
+import BASE_URL from "../../api/baseUrl";
 
 export default function Login() {
   const [emails, setusername] = useState("");

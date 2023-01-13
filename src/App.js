@@ -12,7 +12,7 @@ import Navbar from "./components/navbar/Navbar";
 import { Context } from "./context/Context";
 import Utils from "./utils";
 import { actionTypes } from "./constants/constants";
-import BASE_URL from "./api/URL";
+import BASE_URL from "./api/baseUrl";
 
 const Home = lazy(() => import("./routes/home/Home"));
 const SinglePost = lazy(() => import("./routes/singlePost/SinglePost"));
@@ -58,7 +58,7 @@ function App({ dispatch, socket }) {
 
   const connect = async () => {
     if (socket.connected) return;
-    const socketIo = io("http://localhost:5005/chat", {
+    const socketIo = io(process.env.REACT_APP_CHAT_SOCKET_URL, {
       query: { id: user?._id },
     });
     socketIo.once("connect", () => {
@@ -89,27 +89,41 @@ function App({ dispatch, socket }) {
           <Route exact path="/" component={Home} />
           <Route path="/login" component={Login} />
           <Route path="/signup" component={Register} />
-          <Route path="/write" component={user ? Write : Register} />
-          <Route
-            path="/postdetails/:postId"
-            component={user ? SinglePost : Register}
-          />
-          <Route
-            path="/profile/:username"
-            component={user ? Profile : Register}
-          />
-          <Route path="/feeds" component={user ? Frndsfeed : Register} />
-          <Route path="/settings" component={user ? Settings : Register} />
           <Route path="/error404" component={Error404} />
-          <Route path="/chat" component={user ? Chatapp : Register} />
           <Route path="/contact" component={Contact} />
           <Route path="/about" component={About} />
+          <ProtectedRoute isLoggedIn={user} path="/write" component={Write} />
+          <ProtectedRoute
+            isLoggedIn={user}
+            path="/postdetails/:postId"
+            component={SinglePost}
+          />
+          <ProtectedRoute
+            isLoggedIn={user}
+            path="/profile/:username"
+            component={Profile}
+          />
+          <ProtectedRoute
+            isLoggedIn={user}
+            path="/feeds"
+            component={Frndsfeed}
+          />
+          <ProtectedRoute
+            isLoggedIn={user}
+            path="/settings"
+            component={Settings}
+          />
+          <ProtectedRoute isLoggedIn={user} path="/chat" component={Chatapp} />
           <Redirect exact from="*" to="/error404" />
         </Switch>
       </Suspense>
     </Router>
   );
 }
+
+const ProtectedRoute = ({ component: Component, isLoggedIn, ...rest }) => {
+  return isLoggedIn ? <Component {...rest} /> : <Redirect to="/signup" />;
+};
 
 const mapStateToProps = (state) => ({
   socket: state.socket.socket,

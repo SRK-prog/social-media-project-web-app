@@ -1,5 +1,5 @@
 import { FETCH_FRIENDSPOSTS, FETCH_POSTS, FETCH_USER } from "../types";
-import BASE_URL from "../../api/URL";
+import BASE_URL from "../../api/baseUrl";
 import _ from "lodash";
 
 export const fetchPosts = () => async (dispatch) => {

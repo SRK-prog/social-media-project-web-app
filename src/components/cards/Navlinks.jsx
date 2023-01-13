@@ -1,22 +1,21 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import "./Cards.css";
 
 export default function Navlinks() {
   return (
-    <div className="CardsNavLink">
+    <div className="mt-3 mb-2 flex gap-2">
       <NavLink
-        className="CardsNavLinks"
+        className="ml-2 text-black-0 py-1 px2"
         exact
         to="/"
-        activeClassName="ActiveLink"
+        activeClassName="font-black"
       >
         Feed
       </NavLink>
       <NavLink
-        className="CardsNavLinks"
+        className="ml-2 text-black-0 py-1 px2"
         to="/feeds"
-        activeClassName="ActiveLinkFeed"
+        activeClassName="font-black"
       >
         Post
       </NavLink>

@@ -1,8 +1,6 @@
-import { useEffect } from "react";
-import { useContext } from "react";
+import { useEffect, useContext } from "react";
 import { connect } from "react-redux";
 import Cards from "../../components/cards/Cards";
-import "./Frndspost.css";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Rightbox from "../../components/rightbox/Rightbox";
 import { Context } from "../../context/Context";
@@ -10,19 +8,17 @@ import Skeleton from "../../components/Skeleton/Skeleton";
 import { fetchFriendsPosts } from "../../redux/actions";
 import Navlinks from "../../components/cards/Navlinks";
 
+document.title = "Mern | Post";
+
 function Frndsfeed({ posts, fetchFriendsPosts }) {
   const { user } = useContext(Context);
-
-  useEffect(() => {
-    document.title = "Mern | Post";
-  }, []);
 
   useEffect(() => {
     fetchFriendsPosts(user._id);
   }, [fetchFriendsPosts, user._id]);
 
   const RenderFrndsPosts = () => {
-    if (posts.length === 0) {
+    if (!posts.length) {
       return (
         <div className="flex flex-col flex-[6.5] md:px-0 px-2 mt-1.25">
           <Navlinks />
@@ -31,28 +27,12 @@ function Frndsfeed({ posts, fetchFriendsPosts }) {
           ))}
         </div>
       );
-    } else {
-      return <Cards posts={posts} />;
-      //  posts.includes("Nofrnds") ? (
-      //   <div
-      //     style={{
-      //       display: "flex",
-      //       flex: "6",
-      //       justifyContent: "center",
-      //       alignItems: "center",
-      //     }}
-      //   >
-      //     <Link to="/" className="NofrndsLink">
-      //       No Friends
-      //     </Link>
-      //   </div>
-      // ) : (
-      // );
     }
+    return <Cards posts={posts} />;
   };
 
   return (
-    <div className="FrndsfeedFlex max-w-360 mx-auto">
+    <div className="flex bg-gray-70 max-w-360 mx-auto">
       <Sidebar />
       {RenderFrndsPosts()}
       <Rightbox />

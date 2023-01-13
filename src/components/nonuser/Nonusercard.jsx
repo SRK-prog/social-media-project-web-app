@@ -2,30 +2,23 @@ import "./Nonuser.css";
 import FavoriteBorderOutlinedIcon from "@material-ui/icons/FavoriteBorderOutlined";
 import ModeCommentOutlinedIcon from "@material-ui/icons/ModeCommentOutlined";
 import ShareOutlinedIcon from "@material-ui/icons/ShareOutlined";
-import { connect } from "react-redux";
-import { useEffect } from "react";
 import moment from "moment";
 import { DEFAULT_AVATAR } from "../../constants/constants";
-import { fetchUser } from "../../redux/actions";
 
-const Nonusercard = ({ post, fetchUser, userInfo }) => {
-  useEffect(() => {
-    fetchUser(post.userId);
-  }, [fetchUser, post.userId]);
-
+const Nonusercard = ({ post }) => {
   return (
     <div className="Nonmain-container">
       <div className="Nonprofile-container">
-        <span className="Nonimg-name-box">
+        <span className="flex gap-2.5 pb-2">
           <div>
             <img
-              className="Nonprofile-img"
-              src={userInfo?.profilepicture || DEFAULT_AVATAR}
+              className="h-10 w-10 object-cover rounded-full"
+              src={post?.user?.profilepicture || DEFAULT_AVATAR}
               alt=""
             />
           </div>
           <div className="NonNameDate">
-            <div className="NonpostUserdate">{post.username}</div>
+            <div className="NonpostUserdate">{post?.user?.username}</div>
             <div className="NonpostDate">
               {moment(post.createdAt).fromNow()}
             </div>
@@ -59,10 +52,4 @@ const Nonusercard = ({ post, fetchUser, userInfo }) => {
   );
 };
 
-const mapStateToProps = (state, ownProps) => {
-  return {
-    userInfo: state.user.find((user) => user._id === ownProps.post.userId),
-  };
-};
-
-export default connect(mapStateToProps, { fetchUser })(Nonusercard);
+export default Nonusercard;

@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import Cards from "../../components/cards/Cards";
-import "./home.css";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Rightbox from "../../components/rightbox/Rightbox";
 import Nonuser from "../../components/nonuser/Nonuser";
@@ -20,18 +19,18 @@ function Home({ posts, fetchPosts }) {
   }, [fetchPosts]);
 
   return (
-    <div className="homeFlex max-w-360 mx-auto">
+    <div className="bg-gray-70 flex max-w-360 mx-auto">
       <Sidebar />
-      {posts.length === 0 ? (
-        <>
-          <div className="flex flex-col flex-[6.5] md:px-0 px-2" >
-            {[1, 2, 3, 4, 5].map((k) => (
-              <Skeleton key={k} />
-            ))}
-          </div>
-        </>
+      {!posts.length ? (
+        <div className="flex flex-col flex-[6.5] md:px-0 px-2">
+          {[...new Array(5).keys()].map((k) => (
+            <Skeleton key={k} />
+          ))}
+        </div>
+      ) : user ? (
+        <Cards posts={posts} />
       ) : (
-        <>{user ? <Cards posts={posts} /> : <Nonuser posts={posts} />}</>
+        <Nonuser posts={posts} />
       )}
       <Rightbox />
     </div>

@@ -3,7 +3,7 @@ import "./Register.css";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Close } from "@material-ui/icons";
-import BASE_URL from "../../api/URL";
+import BASE_URL from "../../api/baseUrl";
 import { useHistory } from "react-router-dom";
 
 export default function Register() {

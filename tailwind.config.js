@@ -24,13 +24,24 @@ module.exports = {
         60: "#6d6b6b",
         70: "#efefef",
         80: "#575757",
+        90: "#4b4747",
+        100: "#c0bebe",
+        110: "#f7f7f9",
+        120: "#9c9c9c",
+      },
+      darkGray: {
+        10: "#474646",
+        20: "#777777",
       },
       blue: {
         10: "#1877f2",
         20: "#2d82d1",
+        30: "#3d89ee",
+        40: "#1da1f3",
       },
       lightBlue: {
         10: "#d6e8fa",
+        20: "#88b6f3",
       },
     },
 
@@ -38,12 +49,17 @@ module.exports = {
       spacing: {
         1.25: "5px",
         13.75: "55px",
+        92.5: "370px",
       },
       fontSize: {
         "ft50-60": ["50px", { letterSpacing: "0em", lineHeight: "60px" }],
       },
       maxWidth: {
         360: "1440px",
+      },
+      maxHeight: {
+        77.5: "310px",
+        92.5: "370px",
       },
     },
   },

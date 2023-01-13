@@ -5,7 +5,7 @@ import Sidebar from "../../components/sidebar/Sidebar";
 import { Context } from "../../context/Context";
 import axios from "axios";
 import { DEFAULT_AVATAR } from "../../constants/constants";
-import BASE_URL from "../../api/URL";
+import BASE_URL from "../../api/baseUrl";
 
 document.title = "Settings";
 

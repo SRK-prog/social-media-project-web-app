@@ -1,28 +1,26 @@
 import { TextField, Button } from "@material-ui/core";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Close } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 import "./contact.css";
-import BASE_URL from "../../api/URL";
+import BASE_URL from "../../api/baseUrl";
+
+document.title = "Contact";
 
 export default function Contact() {
   const [sendername, setSendername] = useState("");
   const [senderemail, setSenderemail] = useState("");
   const [message, setmessage] = useState("");
 
-  useEffect(() => {
-    document.title = "Contact";
-  }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const newmail = {
-      sendername,
-      senderemail,
-      message,
-    };
+
     try {
-      const res = await BASE_URL.post("/mail", newmail);
+      const res = await BASE_URL.post("/mail", {
+        sendername,
+        senderemail,
+        message,
+      });
       window.location.replace("/");
       console.log(res.data);
     } catch (err) {

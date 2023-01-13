@@ -5,7 +5,7 @@ import "./Navbar.css";
 import { Context } from "../../context/Context";
 import Menubar from "../sidebar/menubar/Menubar";
 import { DEFAULT_AVATAR } from "../../constants/constants";
-import BASE_URL from "../../api/URL";
+import BASE_URL from "../../api/baseUrl";
 import MobSearchDropdown from "./mobSearchDropdown";
 import ClickOutside from "../../common/components/clickOutside";
 import MenusDropdown from "./menusDropdown";
@@ -35,7 +35,7 @@ export default function Navbar() {
   const handlelogout = () => dispatch({ type: "LOGOUT" });
 
   return (
-    <div className="topbarContainer md:px-5">
+    <div className="topbarContainer px-5">
       <div className="max-w-360 mx-auto flex items-center justify-between w-full">
         <div className="flex items-center">
           <div className="flex items-center justify-center gap-3">
@@ -47,7 +47,7 @@ export default function Navbar() {
             </button>
             <Link
               to="/"
-              className="font-bold md:text-xl text-lg px-2 md:h-12 h-10 gap-2 text-white cursor-pointer bg-black-0 rounded flex items-center"
+              className="font-bold md:text-xl text-lg px-2.5 h-11 gap-2 text-white cursor-pointer bg-black-0 rounded flex items-center"
             >
               <div>Social</div>
               <div>Media</div>
@@ -56,55 +56,57 @@ export default function Navbar() {
               <Menubar showSidebar={showSidebar} onClose={setShowSidebar} />
             </ClickOutside>
           </div>
-          <div className="topbarCenter">
-            <div className="searchbar display_none h-12">
-              {searchterm ? "" : <Search className="searchIcon" />}
-              <input
-                placeholder="Search..."
-                className="searchInput"
-                value={searchterm}
-                onChange={(e) => setSearchterm(e.target.value.toLowerCase())}
-              />
-              {!!searchdata?.length && !!searchterm && (
-                <div className="searchNameLinksCon">
-                  {searchdata.map(({ username }, idx) => (
-                    <Link
-                      key={idx}
-                      onClick={() => setSearchterm("")}
-                      className="searchNameLinks"
-                      to={`/profile/${username}`}
-                    >
-                      {username}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+          <ClickOutside
+            isOpen={!!searchterm}
+            onClickOutside={() => setSearchterm("")}
+            className="md:flex relative hidden h-10 py-1 items-center px-3 border border-gray-90 rounded w-80"
+          >
+            <input
+              placeholder="search..."
+              className="focus:outline-none flex-grow text-base"
+              value={searchterm}
+              onChange={(e) => setSearchterm(e.target.value.toLowerCase())}
+            />
+            {!searchterm && <Search className="searchIcon" />}
+            {!!searchdata?.length && !!searchterm && (
+              <div className="absolute top-12 left-0 bg-white w-full rounded p-1">
+                {searchdata.map(({ username }, idx) => (
+                  <Link
+                    key={idx}
+                    onClick={() => setSearchterm("")}
+                    className="hover:outline-1 hover:outline rounded px-2 py-1 hover:outline-lightBlue-20 hover:text-blue-30 block"
+                    to={`/profile/${username}`}
+                  >
+                    {username}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </ClickOutside>
         </div>
         <div className="topbarRight">
-          <div className="topbarLinks">
+          <div className="flex items-center gap-4">
             {user ? (
               <Link
                 to="/write"
-                className="styleLink display_none duration-200 font-bold"
+                className="styleLink md:block hidden duration-200 font-bold"
               >
                 Create Post
               </Link>
             ) : (
               <>
-                <Link to="/login" className="topbarLink display_none">
+                <Link to="/login" className="topbarLink  md:block hidden">
                   Log in
                 </Link>
-                <Link to="/signup" className="styleLink">
+                <Link to="/signup" className="styleLink duration-200">
                   Create account
                 </Link>
               </>
             )}
           </div>
           {user && (
-            <div className="topbarIcons">
-              <div className="topbarIconItemSearch">
+            <div className="flex items-center gap-4 ml-3">
+              <div className="md:hidden">
                 {!showSearch ? (
                   <Search
                     className="Icon"
@@ -117,7 +119,7 @@ export default function Navbar() {
                   />
                 )}
               </div>
-              <div className="topbarIconItem">
+              <div className="relative cursor-pointer">
                 <img
                   src={user.profilepicture || DEFAULT_AVATAR}
                   alt=""

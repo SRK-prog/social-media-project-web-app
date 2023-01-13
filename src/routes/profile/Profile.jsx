@@ -8,7 +8,7 @@ import "./profile.css";
 import Sidebar from "../../components/sidebar/Sidebar";
 import { Context } from "../../context/Context";
 import { PROFILE_AVATAR } from "../../constants/constants";
-import BASE_URL from "../../api/URL";
+import BASE_URL from "../../api/baseUrl";
 import Cards from "../../components/cards/Cards";
 
 export default function Profile() {

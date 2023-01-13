@@ -7,7 +7,7 @@ import ImageIcon from "@material-ui/icons/Image";
 import DoneIcon from "@material-ui/icons/Done";
 import Sidebar from "../../components/sidebar/Sidebar";
 import { Context } from "../../context/Context";
-import BASE_URL from "../../api/URL";
+import BASE_URL from "../../api/baseUrl";
 
 export default function Write() {
   const [title, setTitle] = useState("");

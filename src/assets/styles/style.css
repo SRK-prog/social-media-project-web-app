@@ -37,3 +37,15 @@
 .custom-scrollbar::-webkit-scrollbar-corner {
   background: transparent;
 }
+
+.trucate-word {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.h-screen-cal-55 {
+  height: calc(100vh - 55px);
+}

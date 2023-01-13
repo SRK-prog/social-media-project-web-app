@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { ArrowBack } from "@material-ui/icons";
+import { ArrowBack, Send } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 import Message from "../../components/message/Message";
-import BASE_URL from "../../api/URL";
+import BASE_URL from "../../api/baseUrl";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 import Utils from "../../utils";
 
@@ -37,7 +37,7 @@ const Conversations = (props) => {
         setMessages(data);
       } catch (error) {}
     })();
-  }, [page]);
+  }, [page, currentChat?._id]);
 
   const handleObserver = useCallback((entries) => {
     const target = entries[0];
@@ -57,10 +57,6 @@ const Conversations = (props) => {
   }, [handleObserver]);
 
   const scrollRef = useRef();
-
-  // useEffect(() => {
-  //   scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-  // }, [messages]);
 
   useEffect(() => {
     setMessages((prev) => [
@@ -84,6 +80,10 @@ const Conversations = (props) => {
         setIsOnline((prev) => (data.online === receiverId ? true : prev));
       });
     }
+
+    return () => {
+      if (socket?.connected) socket.off("user_disconnect");
+    };
     // eslint-disable-next-line
   }, [socket.connected]);
 
@@ -110,12 +110,14 @@ const Conversations = (props) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!newMessage.trim()) return;
     const message = {
       sender: user._id,
       text: newMessage,
       conversationId: currentChat._id,
     };
     onSent({ text: newMessage, sender: user._id, receiver: receiverId });
+    scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
     if (socket.connected) {
       socket.emit(
@@ -155,7 +157,7 @@ const Conversations = (props) => {
   return (
     <>
       {currentChat && (
-        <div className="flex items-cente px-5 py-1.5 bg-gray-20">
+        <div className="flex items-center md:px-5 px-2 py-1.5 bg-gray-20">
           <button className="px-1.5">
             <ArrowBack onClick={onClose} />
           </button>
@@ -177,7 +179,7 @@ const Conversations = (props) => {
           </Link>
         </div>
       )}
-      <div className="chatBoxTop py-4 custom-scrollbar flex flex-col-reverse">
+      <div className="h-full overflow-y-auto px-2.5 my-4 custom-scrollbar flex flex-col-reverse">
         <div ref={scrollRef}></div>
         {messages.map((m) => (
           <div className="px-4" key={m._id}>
@@ -185,23 +187,23 @@ const Conversations = (props) => {
           </div>
         ))}
         <div ref={loader} />
-        <div className="DoNotMsg">
+        <div className="text-center rounded bg-white text-xs text-darkGray-20 border py-2.5 border-gray-120 mx-10">
           Do not share any personal information in chat because I'm watching you
         </div>
       </div>
-      <form onSubmit={handleSubmit} className="px-4 mb-3 flex gap-4 h-12">
+      <form onSubmit={handleSubmit} className="px-4 mb-3 flex gap-3 h-12">
         <input
-          className="h-full flex-grow focus:outline-none border outline-gray-40 rounded-md px-3"
+          className="h-full flex-grow outline-1 outline outline-gray-100 rounded-full px-3"
           placeholder="Message..."
           onChange={(e) => setNewMessage(e.target.value)}
           value={newMessage}
         ></input>
         <button
           type="submit"
-          className="chatSubmitButton"
+          className="h-full w-20 text-white bg-blue-30 rounded-full grid place-content-center"
           onClick={handleSubmit}
         >
-          Send
+          <Send />
         </button>
       </form>
     </>

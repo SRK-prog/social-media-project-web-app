@@ -1,15 +1,9 @@
-.PostDetailsFlex {
-  display: flex;
-  background-color: #efefef;
-  /* margin-top: 10px; */
-}
-
 .smain-container {
   margin-top: 7px;
   border-radius: 5px;
   padding: 10px 0;
   background-color: white;
-  border: 1px solid rgb(192, 190, 190);
+  border: 1px solid #c0bebe;
 }
 
 .DetailsContainer {
@@ -28,17 +22,6 @@
   align-items: center;
 }
 
-.sNameDate {
-  line-height: 1.2rem;
-}
-
-.sprofile-img {
-  height: 40px;
-  width: 40px;
-  border-radius: 50%;
-  margin-right: 10px;
-}
-
 .spostDate {
   color: rgb(71, 70, 70);
   font-size: 0.7rem;
@@ -53,10 +36,6 @@
   object-fit: cover;
   max-height: 370px;
   width: 100%;
-}
-
-.spostUserdate {
-  color: black;
 }
 
 .sPostTitle {

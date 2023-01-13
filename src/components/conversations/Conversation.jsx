@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { DEFAULT_AVATAR } from "../../constants/constants";
-import BASE_URL from "../../api/URL";
+import BASE_URL from "../../api/baseUrl";
 
 const formatText = (conv, curtUserId) => {
   if (!conv?.text) return "";
@@ -13,7 +13,7 @@ function Conversation({ conversation, currentUser, isActive, onSelect }) {
 
   useEffect(() => {
     const friendId = conversation.members.find((m) => m !== currentUser._id);
-    const getUser = async () => {
+    (async () => {
       try {
         const { data } = await BASE_URL.get("/users", {
           params: { userId: friendId },
@@ -22,8 +22,7 @@ function Conversation({ conversation, currentUser, isActive, onSelect }) {
       } catch (err) {
         console.log(err);
       }
-    };
-    getUser();
+    })();
   }, [currentUser, conversation]);
 
   return (
@@ -35,7 +34,7 @@ function Conversation({ conversation, currentUser, isActive, onSelect }) {
     >
       <img
         className="w-10 h-10 object-cover mr-5 rounded-full"
-        src={user.profilepicture || DEFAULT_AVATAR}
+        src={user?.profilepicture || DEFAULT_AVATAR}
         alt=""
       />
       <div className="font-medium">

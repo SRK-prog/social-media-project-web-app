@@ -1,8 +1,7 @@
-import { useContext, useEffect, useState } from "react";
-import "./Chatapp.css";
+import { useContext, useEffect, useState, useRef } from "react";
 import Conversation from "../../components/conversations/Conversation";
 import { Context } from "../../context/Context";
-import BASE_URL from "../../api/URL";
+import BASE_URL from "../../api/baseUrl";
 import Loader from "../../common/components/loader";
 import Conversations from "./Conversations";
 import { connect } from "react-redux";
@@ -15,6 +14,8 @@ function Chatapp({ socket }) {
   const [isLoading, setIsLoading] = useState(true);
   const [incomingMessage, setIncomingMessage] = useState({});
   const { user } = useContext(Context);
+
+  const convRef = useRef(null);
 
   const addSortConversations = (data) => {
     setConversations((prev) => {
@@ -38,7 +39,7 @@ function Chatapp({ socket }) {
     try {
       socket.on("message", (data) => {
         addSortConversations(data);
-        if (currentChat?.members?.includes(data?.sender)) {
+        if (convRef?.current?.includes(data?.sender)) {
           setIncomingMessage(data);
         }
       });
@@ -49,8 +50,11 @@ function Chatapp({ socket }) {
 
   useEffect(() => {
     handleOnMessage();
+    return () => {
+      if (socket?.connected) socket.off("message");
+    };
     // eslint-disable-next-line
-  }, [socket?.connected, currentChat?.members]);
+  }, [socket?.connected]);
 
   useEffect(() => {
     (async () => {
@@ -73,17 +77,26 @@ function Chatapp({ socket }) {
       : false;
   };
 
+  const updateChat = (data) => {
+    setCurrentChat(data);
+    convRef.current = !!data ? data?.members : [];
+  };
+
   if (isLoading) return <Loader />;
 
   if (!!conversations.length) {
     return (
-      <div className="messenger max-w-360 mx-auto">
-        <div className={`chatMenu ${!currentChat && "ChatmenuActive"}`}>
+      <div className="flex bg-gray-110 w-full max-w-360 mx-auto">
+        <div
+          className={`md:sticky fixed md:block z-10 bg-white overflow-y-auto w-full flex-[3] h-screen-cal-55  custom-scrollbar ${
+            !currentChat ? "block" : "hidden"
+          }`}
+        >
           <div className="h-full">
             {conversations.map((c) => (
               <Conversation
                 key={c._id}
-                onSelect={setCurrentChat}
+                onSelect={updateChat}
                 isActive={isActiveConversation(c.members)}
                 conversation={c}
                 currentUser={user}
@@ -92,8 +105,8 @@ function Chatapp({ socket }) {
           </div>
         </div>
 
-        <div className="chatBox">
-          <div className="chatBoxWrapper">
+        <div className="sticky w-full flex-[7] h-screen-cal-55">
+          <div className="flex flex-col justify-between relative w-full h-full">
             {currentChat ? (
               <Conversations
                 user={user}
@@ -102,10 +115,10 @@ function Chatapp({ socket }) {
                 onSent={addSortConversations}
                 receiverId={currentChat?.members.find((i) => i !== user._id)}
                 currentChat={currentChat}
-                onClose={() => setCurrentChat(null)}
+                onClose={() => updateChat(null)}
               />
             ) : (
-              <span className="grid place-content-center h-full text-ft50-60 text-gray-10 text-center">
+              <span className="grid place-content-center h-full text-ft50-60 text-darkGray-20 text-center">
                 Open a conversation to start a chat.
               </span>
             )}
@@ -117,8 +130,8 @@ function Chatapp({ socket }) {
 
   return (
     <div className="flex flex-col justify-center mt-32">
-      <div className="NoFrnds">No Friends</div>
-      <div className="NoFrndsLabel">Follow a Friend To Start Conversation</div>
+      <div className="m-auto font-semibold text-gray-110 mb-2">No Friends</div>
+      <div className="mx-auto">Follow a Friend To Start Conversation</div>
     </div>
   );
 }
