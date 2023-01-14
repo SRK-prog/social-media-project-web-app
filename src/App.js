@@ -13,6 +13,7 @@ import { Context } from "./context/Context";
 import Utils from "./utils";
 import { actionTypes } from "./constants/constants";
 import BASE_URL from "./api/baseUrl";
+import toast, { Toaster } from "react-hot-toast";
 
 const Home = lazy(() => import("./routes/home/Home"));
 const SinglePost = lazy(() => import("./routes/singlePost/SinglePost"));
@@ -32,19 +33,22 @@ const { UPDATE_SOCKET } = actionTypes;
 function App({ dispatch, socket }) {
   const { user } = useContext(Context);
 
+  const notify = (msg) => toast(msg);
+
   useEffect(() => {
     (async () => {
       try {
         await Utils.requestNotificationAccess();
         if (socket.connected) {
-          socket.on("message", async ({ sender, message }) => {
-            if (window.location.pathname === "/chat") return;
+          socket.on("message", async ({ sender, text }) => {
+            notify(text);
+            console.log("message: ", text);
             const { data } = await BASE_URL.get("/users", {
               params: { userId: sender },
             });
             Utils.openNotification({
               title: data?.username,
-              message: message,
+              message: text,
               icon: data?.profilepicture,
             });
           });
@@ -116,6 +120,7 @@ function App({ dispatch, socket }) {
           <ProtectedRoute isLoggedIn={user} path="/chat" component={Chatapp} />
           <Redirect exact from="*" to="/error404" />
         </Switch>
+        <Toaster />
       </Suspense>
     </Router>
   );

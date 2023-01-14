@@ -21,7 +21,7 @@ import { DEFAULT_AVATAR } from "../../constants/constants";
 
 export default function SinglePost() {
   const [post, setPost] = useState({});
-  const [like, setLike] = useState();
+  const [like, setLike] = useState(0);
   const location = useLocation();
   const path = location.pathname.split("/")[2];
   const [isLiked, setIsLiked] = useState(false);
@@ -36,9 +36,6 @@ export default function SinglePost() {
   const [newcomment, setNewcomment] = useState();
   const history = useHistory();
 
-  const CommentsToggle = () => {
-    setCommentsbtn(!commentsbtn);
-  };
   const likeHandler = () => {
     setLike((prevLikes) => (isLiked ? prevLikes - 1 : prevLikes + 1));
     setIsLiked((p) => !p);
@@ -133,9 +130,9 @@ export default function SinglePost() {
                 />
               </div>
               <div>
-                <div className="">{post.username}</div>
+                <div className="">{post?.username}</div>
                 <div className="spostDate">
-                  {moment(post.createdAt).fromNow()}
+                  {moment(post?.createdAt).fromNow()}
                 </div>
               </div>
             </Link>
@@ -143,7 +140,7 @@ export default function SinglePost() {
               <span className="EditPosition">
                 <MoreVert
                   className="Editbtn"
-                  onClick={() => setUpdateMode(!updateMode)}
+                  onClick={() => setUpdateMode((p) => !p)}
                 />
               </span>
             )}
@@ -222,7 +219,7 @@ export default function SinglePost() {
                   <span>{like}</span>
                 </button>
                 <button
-                  onClick={CommentsToggle}
+                  onClick={() => setCommentsbtn((p) => !p)}
                   className="gap-1.5 flex items-center"
                 >
                   <ModeCommentOutlined />

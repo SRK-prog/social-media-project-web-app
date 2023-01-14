@@ -1,14 +1,15 @@
-import "./Nonuser.css";
-import FavoriteBorderOutlinedIcon from "@material-ui/icons/FavoriteBorderOutlined";
-import ModeCommentOutlinedIcon from "@material-ui/icons/ModeCommentOutlined";
-import ShareOutlinedIcon from "@material-ui/icons/ShareOutlined";
 import moment from "moment";
+import {
+  FavoriteBorderOutlined,
+  ModeCommentOutlined,
+  ShareOutlined,
+} from "@material-ui/icons";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 
 const Nonusercard = ({ post }) => {
   return (
-    <div className="Nonmain-container">
-      <div className="Nonprofile-container">
+    <div className="mt-2 rounded-lg bg-white border border-gray-100 py-2.5">
+      <div className="px-3">
         <span className="flex gap-2.5 pb-2">
           <div>
             <img
@@ -19,33 +20,41 @@ const Nonusercard = ({ post }) => {
           </div>
           <div className="NonNameDate">
             <div className="NonpostUserdate">{post?.user?.username}</div>
-            <div className="NonpostDate">
+            <div className="text-darkGray-10 text-xs">
               {moment(post.createdAt).fromNow()}
             </div>
           </div>
         </span>
       </div>
       <div>
-        {post.photo && <img className="Nonmain-pic" src={post.photo} alt="" />}
+        {post.photo && (
+          <img
+            className="md:max-h-92.5 max-h-77.5 w-full"
+            src={post.photo}
+            alt=""
+          />
+        )}
       </div>
-      <div>
-        <span>
-          <div className="NonPostTitle">{post.title}</div>
-          <div className="NonPostDesc">{post.description}</div>
-        </span>
+      <div className="md:px-6 px-4">
+        <div className="mt-2 md:text-3xl text-xl font-medium">
+          {post?.title}
+        </div>
+        <div className="text-black mt-2 mb-2 trucate-word">
+          {post?.description}
+        </div>
       </div>
-      <div className="resIcons">
-        <div className="FlexLike">
-          <span className="LikeShare">
-            <FavoriteBorderOutlinedIcon />
-            <span>{post.likes.length}</span>
+      <div className="flex items-center justify-between md:px-6 px-4">
+        <div className="flex items-center gap-2">
+          <span className="">
+            <FavoriteBorderOutlined />
+            <span>{post?.likes?.length}</span>
           </span>
-          <span className="LikeShare">
-            <ModeCommentOutlinedIcon />
+          <span className="">
+            <ModeCommentOutlined />
           </span>
         </div>
-        <div className="shareIcon">
-          <ShareOutlinedIcon />
+        <div className="">
+          <ShareOutlined />
         </div>
       </div>
     </div>

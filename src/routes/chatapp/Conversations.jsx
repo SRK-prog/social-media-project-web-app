@@ -108,6 +108,13 @@ const Conversations = (props) => {
     // eslint-disable-next-line
   }, [currentChat?._id, socket.connected]);
 
+  const emitMessage = (msgData) => {
+    return new Promise((resolve) => {
+      if (socket.connected) socket.emit("message", msgData, resolve);
+      else resolve({ response: { sent: false } });
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
@@ -119,22 +126,16 @@ const Conversations = (props) => {
     onSent({ text: newMessage, sender: user._id, receiver: receiverId });
     scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
-    if (socket.connected) {
-      socket.emit(
-        "message",
-        {
-          receiver: receiverId,
-          sender: user._id,
-          text: newMessage,
-          createdAt: Date.now(),
-        },
-        () => {}
-      );
-    }
+    const promise = emitMessage({
+      receiver: receiverId,
+      sender: user._id,
+      text: newMessage,
+      createdAt: Date.now(),
+    });
 
     try {
       setMessages([
-        { ...message, _id: Date.now(), createdAt: Date.now() },
+        { ...message, _id: Date.now(), createdAt: Date.now(), promise },
         ...messages,
       ]);
       setNewMessage("");

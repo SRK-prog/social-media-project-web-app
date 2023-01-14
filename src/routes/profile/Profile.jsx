@@ -1,9 +1,6 @@
 import { useContext, useEffect, useState, useRef } from "react";
-import ScheduleIcon from "@material-ui/icons/Schedule";
-import RoomIcon from "@material-ui/icons/Room";
-import { Link } from "react-router-dom";
-import { useLocation } from "react-router";
-import { useHistory } from "react-router-dom";
+import { Schedule, Room } from "@material-ui/icons";
+import { useHistory, useLocation, Link } from "react-router-dom";
 import "./profile.css";
 import Sidebar from "../../components/sidebar/Sidebar";
 import { Context } from "../../context/Context";
@@ -12,131 +9,113 @@ import BASE_URL from "../../api/baseUrl";
 import Cards from "../../components/cards/Cards";
 
 export default function Profile() {
-  const [profle, setProfle] = useState({});
-  const [follow, setfollow] = useState([]);
-  const [id, setId] = useState("");
+  const [profile, setProfile] = useState({});
+  const [follow, setfollow] = useState(0);
   const [isfollowed, setIsfollowed] = useState(false);
-  const [followings, setfollowings] = useState([]);
-  const [desc, setdesc] = useState("");
-  const [city, setCity] = useState("");
-  const [time, setTime] = useState("");
-  const [Isfollowing, setIsfollowing] = useState();
-  const [picture, setPicture] = useState();
   const [posts, setUserposts] = useState([]);
   const location = useLocation();
   const path = location.pathname.split("/")[2];
   const { user: currentUser } = useContext(Context);
   const history = useHistory();
+
   const myRef = useRef(null);
   const executeScroll = () => scrollToRef(myRef);
   const scrollToRef = (ref) => window.scrollTo(0, ref.current.offsetTop);
 
   useEffect(() => {
-    document.title = profle?.username
-      ? `${profle?.username} | Mern`
-      : "Profile | Mern";
-  }, [profle?.username]);
+    document.title = profile?.username ? `Profile | ${profile?.username}` : "Profile";
+  }, [profile?.username]);
 
   // Follow Feature
   const followHandler = () => {
     try {
-      BASE_URL.put("/users/" + id + "/follow", {
-        userId: currentUser._id,
+      BASE_URL.put("/users/profile/follow", {
+        requesterId: currentUser?._id,
+        profileId: profile?._id,
       });
-      if (!isfollowed && !Isfollowing) {
-        try {
-          BASE_URL.post("/conversations", {
-            senderId: currentUser._id,
-            receiverId: id,
-          });
-        } catch (err) {
-          throw err;
-        }
-      } else if (!Isfollowing) {
-        BASE_URL.delete(`/conversations/delete/${currentUser._id}/${id}`);
-      }
     } catch (err) {
       console.log("follow feature error: ", err);
     }
     setfollow(isfollowed ? follow - 1 : follow + 1);
-    setIsfollowed(!isfollowed);
+    setIsfollowed((p) => !p);
   };
 
   // Fetching users data
   useEffect(() => {
     BASE_URL.get(`/users/${path}`)
       .then(({ data }) => {
-        setProfle(data);
-        setdesc(data.desc);
-        setCity(data.city);
-        setTime(data.createdAt);
-        setPicture(data.profilepicture);
+        setProfile(data);
         setfollow(data.followers.length);
-        setfollowings(data.followings.length);
-        setId(data._id);
-        setIsfollowing(data.followings.includes(currentUser._id));
         setIsfollowed(data.followers.includes(currentUser._id));
       })
       .catch(() => {
         history.push("/error404");
       });
-  }, [path, history, currentUser._id]);
+    // eslint-disable-next-line
+  }, [path, currentUser._id]);
+
+  const isfollowing = () => {
+    return profile?.followings?.includes(currentUser._id);
+  };
 
   // Fetching user posts
   useEffect(() => {
-    const response = async () => {
-      await BASE_URL.get("/posts/profile/" + path).then(({ data }) => {
-        setUserposts(data);
-      });
-    };
-    response();
+    (async () => {
+      try {
+        BASE_URL.get("/posts/profile/" + path)
+          .then((r) => r.data)
+          .then(setUserposts);
+      } catch (error) {
+        console.log("error: ", error);
+      }
+    })();
   }, [path]);
 
   return (
-    <div className="ProfileFlexBox max-w-360 mx-auto">
-      <div className="DisplayNoneSidebar">
+    <div className="flex max-w-360 mx-auto">
+      <div className="flex-[2] md:block hidden">
         <Sidebar />
       </div>
-      <div className="ProfileContainer">
-        <div className="colorContainer"></div>
+      <div className="relative flex-[6.5] bg-gray-130">
+        <div className="h-24 bg-gray-140"></div>
         <div>
           <img
             className="ProfileImage"
-            src={picture ? picture : PROFILE_AVATAR}
+            src={profile?.profilepicture || PROFILE_AVATAR}
             alt=""
           />
-          {desc && <div style={{ height: "25px" }}></div>}
-          {city && <div style={{ height: "25px" }}></div>}
+          {profile?.description && <div style={{ height: "25px" }}></div>}
+          {profile?.city && <div style={{ height: "25px" }}></div>}
           <div className="ProfileDetails">
             <div className="FollowFlex">
               <span className="FollowFlexBox"></span>
               <span className="FollowCounts">
                 <span
                   onClick={executeScroll}
-                  className="Follows"
-                  style={{ cursor: "pointer" }}
+                  className="Follows cursor-pointer"
                 >
-                  <div className="CountsTitles">Posts</div>{" "}
+                  <div className="CountsTitles">Posts</div>
                   <div className="CountsOf">{posts.length}</div>
                 </span>
                 <span className="Follows">
-                  <div className="CountsTitles">Followers</div>{" "}
+                  <div className="CountsTitles">Followers</div>
                   <div className="CountsOf">{follow}</div>
                 </span>
                 <span className="Follows">
-                  {" "}
-                  <div className="CountsTitles">Following</div>{" "}
-                  <div className="CountsOf">{followings}</div>
+                  <div className="CountsTitles">Following</div>
+                  <div className="CountsOf">
+                    {profile?.followings?.length || 0}
+                  </div>
                 </span>
               </span>
             </div>
             <div className="UserInfo">
               <div className="UserName">
-                <h2>{profle?.username}</h2>
-                <p>@{profle?.username}</p>
+                <h2>{profile?.username}</h2>
+                <p>@{profile?.username}</p>
               </div>
               <div className="BtnWrper">
-                {profle?._id !== currentUser?._id && (
+                {profile?._id !== currentUser?._id && (
                   <div className="BtnSection">
                     <div className="FollowBtn">
                       <div>
@@ -150,47 +129,49 @@ export default function Profile() {
                         ) : (
                           <button
                             className={
-                              !Isfollowing ? "followbutton" : "followbackbutton"
+                              !isfollowing()
+                                ? "followbutton"
+                                : "followbackbutton"
                             }
                             onClick={followHandler}
                           >
-                            {Isfollowing ? "Follow back" : "Follow"}
+                            {isfollowing() ? "Follow back" : "Follow"}
                           </button>
                         )}
                       </div>
                     </div>
-                    <div className="FollowBtn">
-                      <Link
-                        to="/chat"
-                        className="LinkBtn"
-                        style={{ textDecoration: "none", color: "white" }}
-                      >
-                        Messege
-                      </Link>
-                    </div>
+                    {(isfollowed || isfollowing()) && (
+                      <div className="FollowBtn">
+                        <Link to="/chat" className="LinkBtn text-white">
+                          Messege
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             </div>
             <div className="DescContainer">
-              {desc && <div className="UserAbout">{desc}</div>}
+              {profile?.description && (
+                <div className="UserAbout">{profile?.description}</div>
+              )}
             </div>
             <div className="JoinDate">
-              {city && (
+              {profile?.city && (
                 <span className="JoinItems">
-                  <RoomIcon className="IconSpace" /> {city}
+                  <Room className="IconSpace" /> {profile?.city}
                 </span>
               )}
               <span className="JoinItems">
-                <ScheduleIcon className="IconSpace" />{" "}
-                {new Date(time).toDateString()}
+                <Schedule className="IconSpace" />
+                {new Date(profile?.createdAt).toDateString()}
               </span>
             </div>
           </div>
         </div>
         <div className="ProfilePostWrapper">
           <div ref={myRef} className="ProfilePosts">
-            {posts && <Cards NoLink={true} posts={posts} />}
+            {!!posts?.length && <Cards NoLink={true} posts={posts} />}
           </div>
         </div>
       </div>

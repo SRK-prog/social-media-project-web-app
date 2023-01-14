@@ -26,6 +26,7 @@ export default function Settings() {
       username,
       email,
       desc,
+      description: desc,
       city,
     };
     try {

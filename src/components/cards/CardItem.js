@@ -1,11 +1,13 @@
+import { useContext, useState, useEffect } from "react";
 import { Link, useHistory } from "react-router-dom";
 import moment from "moment";
-import FavoriteBorderOutlinedIcon from "@material-ui/icons/FavoriteBorderOutlined";
-import ModeCommentOutlinedIcon from "@material-ui/icons/ModeCommentOutlined";
-import ShareOutlinedIcon from "@material-ui/icons/ShareOutlined";
+import {
+  FavoriteBorderOutlined,
+  ModeCommentOutlined,
+  ShareOutlined,
+  Favorite,
+} from "@material-ui/icons";
 import { Context } from "../../context/Context";
-import { useContext, useState, useEffect } from "react";
-import FavoriteIcon from "@material-ui/icons/Favorite";
 import BASE_URL from "../../api/baseUrl";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 import useSingleAndDoubleClick from "../../hooks/useSingleAndDoubleClick";
@@ -83,18 +85,18 @@ const CardItem = ({ post }) => {
             className="flex cursor-pointer items-center"
           >
             {isLiked ? (
-              <FavoriteIcon style={{ color: "red" }} />
+              <Favorite style={{ color: "red" }} />
             ) : (
-              <FavoriteBorderOutlinedIcon />
+              <FavoriteBorderOutlined />
             )}
             <span>{like}</span>
           </button>
           <Link to={`/postdetails/${post._id}`}>
-            <ModeCommentOutlinedIcon />
+            <ModeCommentOutlined />
           </Link>
         </div>
         <div className="">
-          <ShareOutlinedIcon />
+          <ShareOutlined />
         </div>
       </div>
     </div>

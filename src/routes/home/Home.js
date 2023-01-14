@@ -9,12 +9,11 @@ import { useContext } from "react";
 import Skeleton from "../../components/Skeleton/Skeleton";
 import { fetchPosts } from "../../redux/actions";
 
-document.title = "Social Media";
-
 function Home({ posts, fetchPosts }) {
   const { user } = useContext(Context);
 
   useEffect(() => {
+    document.title = "Social Media";
     fetchPosts();
   }, [fetchPosts]);
 
@@ -36,8 +35,6 @@ function Home({ posts, fetchPosts }) {
     </div>
   );
 }
-const mapStateToProps = (state) => {
-  return { posts: state.posts };
-};
+const mapStateToProps = (state) => ({ posts: state.posts });
 
 export default connect(mapStateToProps, { fetchPosts })(Home);

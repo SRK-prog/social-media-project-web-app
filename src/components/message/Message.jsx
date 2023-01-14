@@ -1,4 +1,5 @@
 import moment from "moment";
+import { memo } from "react";
 
 const formatDate = (date) => {
   const today = new Date();
@@ -8,7 +9,9 @@ const formatDate = (date) => {
   return moment(date).format("DD-MM-YYYY hh:mm a");
 };
 
-export default function Message({ message, own }) {
+function Message({ message, own }) {
+  console.log('message?.promise: ', message?.promise)
+  message?.promise && message.promise.then((m) => console.log("m: ", m));
   return (
     <div className={`flex flex-col ${own && "items-end"} mt-2`}>
       <div className={`max-w-xs flex`}>
@@ -24,3 +27,5 @@ export default function Message({ message, own }) {
     </div>
   );
 }
+
+export default memo(Message);
