@@ -1,5 +1,6 @@
+import { memo, useState, useEffect } from "react";
 import moment from "moment";
-import { memo } from "react";
+import { DoneAll } from "@material-ui/icons";
 
 const formatDate = (date) => {
   const today = new Date();
@@ -9,19 +10,30 @@ const formatDate = (date) => {
   return moment(date).format("DD-MM-YYYY hh:mm a");
 };
 
-function Message({ message, own }) {
-  console.log('message?.promise: ', message?.promise)
-  message?.promise && message.promise.then((m) => console.log("m: ", m));
+function Message({ message, own, showSent }) {
+  const [isSent, setIsSent] = useState(false);
+
+  useEffect(() => {
+    if (showSent)
+      message.promise.then((r) => r?.response?.sent).then(setIsSent);
+    // eslint-disable-next-line
+  }, []);
+
   return (
     <div className={`flex flex-col ${own && "items-end"} mt-2`}>
       <div className={`max-w-xs flex`}>
         <div
-          className={`px-2.5 py-1 rounded ${
+          className={`px-2.5 py-1 rounded relative ${
             own ? "bg-blue-10 text-white" : "bg-gray-50"
           }`}
         >
           <div className="text-xs">{formatDate(message?.createdAt)}</div>
-          <div className="md:text-base text-sm">{message?.text}</div>
+          <div className="md:text-base text-sm break-all">{message?.text}</div>
+          {showSent && isSent && (
+            <div className="text-[14px] absolute text-white bottom-0.5 right-2">
+              <DoneAll fontSize="inherit" />
+            </div>
+          )}
         </div>
       </div>
     </div>

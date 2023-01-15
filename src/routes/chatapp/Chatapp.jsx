@@ -5,8 +5,13 @@ import BASE_URL from "../../api/baseUrl";
 import Loader from "../../common/components/loader";
 import Conversations from "./Conversations";
 import { connect } from "react-redux";
+import { subscribe, unsubscribe } from "../../services/events";
 
 document.title = "Chat | Mern";
+
+const checkIdsIncludes = (array, idOne, idTwo) => {
+  return array.includes(idOne) && array.includes(idTwo);
+};
 
 function Chatapp({ socket }) {
   const [conversations, setConversations] = useState([]);
@@ -17,44 +22,38 @@ function Chatapp({ socket }) {
 
   const convRef = useRef(null);
 
-  const addSortConversations = (data) => {
+  const addSortConversations = ({ sender, receiver, text }) => {
     setConversations((prev) => {
       const temp = prev.map((i) =>
-        i.members.includes(data?.sender)
-          ? { ...i, text: data?.text, sender: data?.sender }
+        checkIdsIncludes(i.members, sender, receiver)
+          ? { ...i, text, sender: sender }
           : i
       );
       return temp.sort((x, y) =>
-        x.members.includes(data?.sender)
+        checkIdsIncludes(x.members, sender, receiver)
           ? -1
-          : y.members.includes(data?.sender)
+          : checkIdsIncludes(y.members, sender, receiver)
           ? 1
           : 0
       );
     });
   };
 
-  const handleOnMessage = () => {
-    if (!socket?.connected) return;
-    try {
-      socket.on("message", (data) => {
-        addSortConversations(data);
-        if (convRef?.current?.includes(data?.sender)) {
-          setIncomingMessage(data);
-        }
-      });
-    } catch (error) {
-      console.error("error handleOnMessage: ", error);
-    }
-  };
-
   useEffect(() => {
-    handleOnMessage();
+    const onMessage = ({ detail }) => {
+      addSortConversations(detail);
+      if (convRef?.current?.includes(detail?.sender)) {
+        setIncomingMessage(detail);
+      }
+    };
+
+    subscribe("message", onMessage);
+
     return () => {
-      if (socket?.connected) socket.off("message");
+      unsubscribe("message", onMessage);
     };
     // eslint-disable-next-line
-  }, [socket?.connected]);
+  }, []);
 
   useEffect(() => {
     (async () => {

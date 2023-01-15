@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { ArrowBack, Send } from "@material-ui/icons";
+import { ArrowBack } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 import Message from "../../components/message/Message";
 import BASE_URL from "../../api/baseUrl";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 import Utils from "../../utils";
+import InputField from "./inputField";
+import usePrevious from "../../hooks/usePrevious";
 
 const Conversations = (props) => {
   const {
@@ -18,57 +20,118 @@ const Conversations = (props) => {
   } = props;
   const [isOnline, setIsOnline] = useState(false);
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState("");
   const [justNowLeaved, setJustNowLeaved] = useState({
     status: false,
     lastSeen: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const loader = useRef(null);
+
+  const prevConvId = usePrevious(currentChat?._id);
+
+  const topEndRef = useRef(null);
+  const scrollRef = useRef(null);
+
+  const pageState = useRef({
+    total: 0,
+    page: 0,
+    loading: false,
+    conversationId: currentChat?._id,
+    receiverId: receiverId,
+  });
+
+  useEffect(() => {
+    pageState.current.conversationId = currentChat?._id;
+    pageState.current.receiverId = receiverId;
+  }, [currentChat?._id, receiverId]);
+
   const loadingStatus = useRef(true);
+  const totalPages = useRef(0);
+  const pageCount = useRef(0);
+  const convId = useRef(currentChat?._id);
+
+  const fetchMessages = async (params) => {
+    try {
+      updateLoading(true);
+      const {
+        data: { data, total },
+      } = await BASE_URL.get("/messages/get-messages", { params });
+      return [data, total];
+    } catch (error) {
+      console.error("fetchMessages:- ", error);
+    } finally {
+      updateLoading(false);
+    }
+  };
 
   useEffect(() => {
     (async () => {
-      try {
-        updateLoading(true);
-        const { data } = await BASE_URL.get("/messages/" + currentChat?._id);
-        updateLoading(false);
-        setMessages(data);
-      } catch (error) {}
+      window.chatId = currentChat?._id;
+      convId.current = currentChat?._id;
+      if (prevConvId && prevConvId !== currentChat?._id) {
+        setMessages([]);
+        pageCount.current = 0;
+        totalPages.current = 0;
+      }
+      const [data, total] = await fetchMessages({
+        skip: pageCount.current,
+        limit: 30,
+        conversationId: currentChat?._id,
+      });
+      totalPages.current = total;
+      setMessages(data);
     })();
-  }, [page, currentChat?._id]);
+    // eslint-disable-next-line
+  }, [currentChat?._id]);
+
+  const loadMoreMessages = async () => {
+    const [data] = await fetchMessages({
+      skip: pageCount.current,
+      limit: 30,
+      conversationId: convId.current,
+    });
+    setMessages((p) => [...p, ...data]);
+  };
 
   const handleObserver = useCallback((entries) => {
-    const target = entries[0];
+    const [target] = entries;
     if (target.isIntersecting && !loadingStatus.current) {
-      setPage((prev) => prev + 1);
+      const count = pageCount.current;
+      if (totalPages.current !== count) {
+        pageCount.current = count + 1;
+        loadMoreMessages();
+      }
     }
+    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
-    const option = {
-      root: null,
-      rootMargin: "30px",
-      threshold: 0,
-    };
+    const option = { root: null, rootMargin: "30px", threshold: 0 };
     const observer = new IntersectionObserver(handleObserver, option);
-    if (loader.current) observer.observe(loader.current);
+    if (topEndRef.current) observer.observe(topEndRef.current);
+
+    return () => {
+      // eslint-disable-next-line
+      if (topEndRef.current) observer.unobserve(topEndRef.current);
+    };
   }, [handleObserver]);
 
-  const scrollRef = useRef();
-
   useEffect(() => {
-    setMessages((prev) => [
-      { ...incomingMessage, _id: Date.now(), conversationId: currentChat._id },
-      ...prev,
-    ]);
+    if (Object.keys(incomingMessage).length)
+      setMessages((prev) => [
+        {
+          ...incomingMessage,
+          _id: Date.now(),
+          conversationId: currentChat._id,
+        },
+        ...prev,
+      ]);
     // eslint-disable-next-line
   }, [incomingMessage]);
 
   useEffect(() => {
     if (socket.connected) {
       socket.on("user_disconnect", (data) => {
+        console.log("receiverId: ", receiverId);
         const isCurrentUserChat = data.offline === receiverId;
         setJustNowLeaved({
           status: isCurrentUserChat,
@@ -100,7 +163,6 @@ const Conversations = (props) => {
           setIsOnline(response?.online);
         });
       } catch (err) {
-        updateLoading(false);
         console.log(err);
       }
     })();
@@ -115,30 +177,29 @@ const Conversations = (props) => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
+  const handleSubmit = async (text) => {
+    if (!text.trim()) return;
     const message = {
       sender: user._id,
-      text: newMessage,
+      text: text,
       conversationId: currentChat._id,
     };
-    onSent({ text: newMessage, sender: user._id, receiver: receiverId });
+    onSent({ text, sender: user._id, receiver: receiverId });
     scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
     const promise = emitMessage({
+      ...message,
       receiver: receiverId,
-      sender: user._id,
-      text: newMessage,
+      profilepicture: user?.profilepicture,
+      username: user?.username,
       createdAt: Date.now(),
     });
 
     try {
-      setMessages([
+      setMessages((prev) => [
         { ...message, _id: Date.now(), createdAt: Date.now(), promise },
-        ...messages,
+        ...prev,
       ]);
-      setNewMessage("");
       await BASE_URL.post("/messages", message);
     } catch (err) {
       console.log(err);
@@ -153,6 +214,14 @@ const Conversations = (props) => {
             ? Utils.formatDate(justNowLeaved?.lastSeen)
             : Utils.formatDate(currentChat?.lastSeen)
         }`;
+  };
+
+  const showSent = (msg, idx) => {
+    return (
+      msg?.sender === user?._id &&
+      !!msg?.promise &&
+      messages[idx]?._id === msg?._id
+    );
   };
 
   return (
@@ -180,33 +249,28 @@ const Conversations = (props) => {
           </Link>
         </div>
       )}
+      {loading && (
+        <div className="h-10 w-10 absolute top-20 right-0 left-0 mx-auto shadow-md p-1 rounded-full">
+          <div className="circle-topEndRef"></div>
+        </div>
+      )}
       <div className="h-full overflow-y-auto px-2.5 my-4 custom-scrollbar flex flex-col-reverse">
         <div ref={scrollRef}></div>
-        {messages.map((m) => (
+        {messages.map((m, idx) => (
           <div className="px-4" key={m._id}>
-            <Message message={m} own={m.sender === user._id} />
+            <Message
+              showSent={showSent(m, idx)}
+              message={m}
+              own={m.sender === user._id}
+            />
           </div>
         ))}
-        <div ref={loader} />
+        <div ref={topEndRef}></div>
         <div className="text-center rounded bg-white text-xs text-darkGray-20 border py-2.5 border-gray-120 mx-10">
           Do not share any personal information in chat because I'm watching you
         </div>
       </div>
-      <form onSubmit={handleSubmit} className="px-4 mb-3 flex gap-3 h-12">
-        <input
-          className="h-full flex-grow outline-1 outline outline-gray-100 rounded-full px-3"
-          placeholder="Message..."
-          onChange={(e) => setNewMessage(e.target.value)}
-          value={newMessage}
-        ></input>
-        <button
-          type="submit"
-          className="h-full w-20 text-white bg-blue-30 rounded-full grid place-content-center"
-          onClick={handleSubmit}
-        >
-          <Send />
-        </button>
-      </form>
+      <InputField onSubmit={handleSubmit} />
     </>
   );
 };

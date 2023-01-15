@@ -12,8 +12,9 @@ import Navbar from "./components/navbar/Navbar";
 import { Context } from "./context/Context";
 import Utils from "./utils";
 import { actionTypes } from "./constants/constants";
-import BASE_URL from "./api/baseUrl";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
+import { publish } from "./services/events";
+import notifyToast from "./common/components/notifyToast";
 
 const Home = lazy(() => import("./routes/home/Home"));
 const SinglePost = lazy(() => import("./routes/singlePost/SinglePost"));
@@ -33,30 +34,39 @@ const { UPDATE_SOCKET } = actionTypes;
 function App({ dispatch, socket }) {
   const { user } = useContext(Context);
 
-  const notify = (msg) => toast(msg);
-
   useEffect(() => {
     (async () => {
       try {
         await Utils.requestNotificationAccess();
-        if (socket.connected) {
-          socket.on("message", async ({ sender, text }) => {
-            notify(text);
-            console.log("message: ", text);
-            const { data } = await BASE_URL.get("/users", {
-              params: { userId: sender },
-            });
-            Utils.openNotification({
-              title: data?.username,
-              message: text,
-              icon: data?.profilepicture,
-            });
-          });
-        }
-      } catch (err) {
-        console.warn("Notification error", err);
+      } catch (error) {
+        console.warn("Notification error", error);
       }
     })();
+  }, []);
+
+  const showNotication = (data) => {
+    notifyToast(data);
+    Utils.openNotification({
+      title: data?.username,
+      message: data?.text || "",
+      icon: data?.profilepicture,
+    });
+  };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (socket.connected) {
+          socket.on("message", async (data) => {
+            publish("message", data);
+            showNotication(data);
+          });
+        }
+      } catch (err) {}
+    })();
+    return () => {
+      if (socket.connect) socket.off("message");
+    };
     // eslint-disable-next-line
   }, [socket.connected]);
 
@@ -120,7 +130,7 @@ function App({ dispatch, socket }) {
           <ProtectedRoute isLoggedIn={user} path="/chat" component={Chatapp} />
           <Redirect exact from="*" to="/error404" />
         </Switch>
-        <Toaster />
+        <Toaster position="bottom-right" reverseOrder={false} />
       </Suspense>
     </Router>
   );

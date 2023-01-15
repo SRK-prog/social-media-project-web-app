@@ -9,11 +9,11 @@ class Utils {
       const permission = await Notification.requestPermission();
       if (permission === "granted") return resolve();
       if (permission === "denied") return reject(error);
-      console.log('message: ', )
     });
   };
 
   static openNotification({ icon, title, message: body }) {
+    if (Notification.permission === "denied") return;
     new Notification(title, {
       body,
       icon: !!icon ? icon : "/images/avatar.png",

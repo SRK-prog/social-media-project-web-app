@@ -23,7 +23,8 @@ function Conversation({ conversation, currentUser, isActive, onSelect }) {
         console.log(err);
       }
     })();
-  }, [currentUser, conversation]);
+    // eslint-disable-next-line
+  }, [currentUser]);
 
   return (
     <div

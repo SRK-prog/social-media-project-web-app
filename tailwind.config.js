@@ -4,6 +4,7 @@ module.exports = {
       "./src/components/**/*.{js,jsx,ts,tsx}",
       "./src/common/**/*.{js,jsx,ts,tsx}",
       "./src/routes/**/*.{js,jsx,ts,tsx}",
+      "./src/**/*.{js,jsx,ts,tsx}",
     ],
     options: { safelist: [] },
   },
