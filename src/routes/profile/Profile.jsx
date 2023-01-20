@@ -1,200 +1,199 @@
-import ScheduleIcon from "@material-ui/icons/Schedule";
-import RoomIcon from "@material-ui/icons/Room";
-import { useContext, useEffect, useState, useRef } from "react";
-import { Link } from "react-router-dom";
-import { useLocation } from "react-router";
-import { useHistory } from "react-router-dom";
-import "./profile.css";
+import { useEffect, useState, useRef } from "react";
+import { Schedule, Room } from "@material-ui/icons";
+import { useHistory, useLocation, Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Sidebar from "../../components/sidebar/Sidebar";
-import { Context } from "../../context/Context";
-import { DEFAULT_AVATAR } from "../../constants/constants";
-import BASE_URL from "../../api/URL";
+import { PROFILE_AVATAR } from "../../constants/constants";
+import BASE_URL from "../../api/baseUrl";
 import Cards from "../../components/cards/Cards";
+import Loader from "../../common/components/loader";
 
 export default function Profile() {
-  const [details, setProfileDetails] = useState({});
-  const [follow, setfollow] = useState([]);
-  const [id, setId] = useState();
+  const user = useSelector((state) => state.user);
+
+  const [profile, setProfile] = useState({});
+  const [follow, setfollow] = useState(0);
   const [isfollowed, setIsfollowed] = useState(false);
-  const [followings, setfollowings] = useState([]);
-  const [desc, setdesc] = useState();
-  const [name, setName] = useState();
-  const [city, setCity] = useState();
-  const [time, setTime] = useState();
-  const [Isfollowing, setIsfollowing] = useState();
-  const [picture, setPicture] = useState();
   const [posts, setUserposts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const location = useLocation();
-  const path = location.pathname.split("/")[2];
-  const { user: currentUser } = useContext(Context);
+  const profileId = location.pathname.split("/")[2];
   const history = useHistory();
-  const myRef = useRef(null);
-  const executeScroll = () => scrollToRef(myRef);
+
+  const postScrollRef = useRef(null);
+  const executeScroll = () => scrollToRef(postScrollRef);
   const scrollToRef = (ref) => window.scrollTo(0, ref.current.offsetTop);
 
   useEffect(() => {
-    document.title = name ? `${name} | Mern` : "Profile | Mern";
-  }, [name]);
+    document.title = profile?.username
+      ? `Profile | ${profile?.username}`
+      : "Profile";
+  }, [profile?.username]);
 
   // Follow Feature
   const followHandler = () => {
     try {
-      BASE_URL.put("/users/" + id + "/follow", {
-        userId: currentUser._id,
-      });
-      if (!isfollowed) {
-        if (!Isfollowing) {
-          try {
-            BASE_URL.post("/conversations", {
-              senderId: currentUser._id,
-              receiverId: id,
-            });
-          } catch (err) {}
-        }
-      } else if (!Isfollowing) {
-        BASE_URL.delete(`/conversations/delete/${currentUser._id}/${id}`);
-      }
-    } catch (err) {}
+      BASE_URL.put(
+        "/users/profile/follow",
+        { profileId: profile?._id },
+        { headers: { Authorization: `Bearer ${user.accessToken}` } }
+      );
+    } catch (err) {
+      console.log("follow feature error: ", err);
+    }
     setfollow(isfollowed ? follow - 1 : follow + 1);
-    setIsfollowed(!isfollowed);
+    setIsfollowed((p) => !p);
   };
 
-  // Fetching users data
   useEffect(() => {
-    BASE_URL.get(`/users/${path}`)
-      .then(({ data }) => {
-        setProfileDetails(data);
-        setName(data.username);
-        setdesc(data.desc);
-        setCity(data.city);
-        setTime(data.createdAt);
-        setPicture(data.profilepicture);
-        setfollow(data.followers.length);
-        setfollowings(data.followings.length);
-        setId(data._id);
-        setIsfollowing(data.followings.includes(currentUser._id));
-        setIsfollowed(data.followers.includes(currentUser._id));
-      })
-      .catch(() => {
-        history.push("/error404");
-      });
-  }, [path, history, currentUser._id]);
+    (async () => {
+      setIsLoading(true);
+      try {
+        const select =
+          "username email profilepicture followers followings createdAt lastSeen";
+        const [profileUser, profilePosts] = await Promise.all([
+          BASE_URL.get(`/users`, {
+            params: { userId: profileId, select },
+          }),
+          BASE_URL.get("/posts/profile", {
+            params: { userId: profileId },
+          }).catch((er) => {
+            if (er.response.status === 404) setUserposts([]);
+          }),
+        ]);
 
-  // Fetching user posts
-  useEffect(() => {
-    const response = async () => {
-      await BASE_URL.get("/posts/profile/" + path).then(({ data }) => {
-        setUserposts(data);
-      });
-    };
-    response();
-  }, [path]);
+        if (profilePosts) setUserposts(profilePosts.data?.response || []);
+        setProfile(profileUser.data?.response);
+        setfollow(profileUser.data?.response?.followers?.length);
+        setIsfollowed(
+          profileUser.data?.response?.followers?.includes(user.userId)
+        );
+      } catch (error) {
+        history.push("/error404");
+        console.log("profile error: ", error);
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+    // eslint-disable-next-line
+  }, [profileId, user.userId]);
+
+  const isfollowing = () => {
+    return profile?.followings?.includes(user.userId);
+  };
 
   return (
-    <div className="ProfileFlexBox">
-      <div className="DisplayNoneSidebar">
+    <div className="flex max-w-360 mx-auto">
+      <div className="flex-[2] md:block hidden">
         <Sidebar />
       </div>
-      <div className="ProfileContainer">
-        <div className="colorContainer"></div>
-        <div>
-          <img
-            className="ProfileImage"
-            src={picture ? picture : DEFAULT_AVATAR}
-            alt=""
-          />
-          {desc && <div style={{ height: "25px" }}></div>}
-          {city && <div style={{ height: "25px" }}></div>}
-          <div className="ProfileDetails">
-            <div className="FollowFlex">
-              <span className="FollowFlexBox"></span>
-              <span className="FollowCounts">
-                <span
-                  onClick={executeScroll}
-                  className="Follows"
-                  style={{ cursor: "pointer" }}
-                >
-                  <div className="CountsTitles">Posts</div>{" "}
-                  <div className="CountsOf">{posts.length}</div>
+      {isLoading && (
+        <div className="flex-[6.5]">
+          <Loader />
+        </div>
+      )}
+      {!isLoading && (
+        <div className="relative flex-[6.5] bg-gray-130">
+          <div className="h-24 bg-gray-140"></div>
+          <div>
+            <img
+              className="ProfileImage"
+              src={profile?.profilepicture || PROFILE_AVATAR}
+              alt=""
+            />
+            {profile?.description && <div style={{ height: "25px" }}></div>}
+            {profile?.city && <div style={{ height: "25px" }}></div>}
+            <div className="ProfileDetails">
+              <div className="FollowFlex">
+                <span className="FollowFlexBox"></span>
+                <span className="FollowCounts">
+                  <span
+                    onClick={executeScroll}
+                    className="Follows cursor-pointer"
+                  >
+                    <div className="CountsTitles">Posts</div>
+                    <div className="CountsOf">{posts.length}</div>
+                  </span>
+                  <span className="Follows">
+                    <div className="CountsTitles">Followers</div>
+                    <div className="CountsOf">{follow}</div>
+                  </span>
+                  <span className="Follows">
+                    <div className="CountsTitles">Following</div>
+                    <div className="CountsOf">
+                      {profile?.followings?.length || 0}
+                    </div>
+                  </span>
                 </span>
-                <span className="Follows">
-                  <div className="CountsTitles">Followers</div>{" "}
-                  <div className="CountsOf">{follow}</div>
-                </span>
-                <span className="Follows">
-                  {" "}
-                  <div className="CountsTitles">Following</div>{" "}
-                  <div className="CountsOf">{followings}</div>
-                </span>
-              </span>
-            </div>
-            <div className="UserInfo">
-              <div className="UserName">
-                <h2>{details?.username}</h2>
-                <p>@{details?.username}</p>
               </div>
-              <div className="BtnWrper">
-                <div className="BtnSection">
-                  <div className="FollowBtn">
-                    {name !== currentUser?.username && (
-                      <div>
-                        {isfollowed ? (
-                          <span
-                            className="followingbutton"
-                            onClick={followHandler}
-                          >
-                            Following
-                          </span>
-                        ) : (
-                          <span
-                            className={
-                              !Isfollowing ? "followbutton" : "followbackbutton"
-                            }
-                            onClick={followHandler}
-                          >
-                            {Isfollowing ? "FollowBack" : "Follow"}
-                          </span>
-                        )}
+              <div className="UserInfo">
+                <div className="UserName">
+                  <h2>{profile?.username}</h2>
+                  <p>@{profile?.username}</p>
+                </div>
+                <div className="BtnWrper">
+                  {profile?._id !== user?.userId && (
+                    <div className="BtnSection">
+                      <div className="FollowBtn">
+                        <div>
+                          {isfollowed ? (
+                            <button
+                              className="followingbutton"
+                              onClick={followHandler}
+                            >
+                              Following
+                            </button>
+                          ) : (
+                            <button
+                              className={
+                                !isfollowing()
+                                  ? "followbutton"
+                                  : "followbackbutton"
+                              }
+                              onClick={followHandler}
+                            >
+                              {isfollowing() ? "Follow back" : "Follow"}
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                  <div className="FollowBtn">
-                    {name !== currentUser?.username && (
-                      <Link
-                        to="/chat"
-                        className="LinkBtn"
-                        style={{ textDecoration: "none", color: "white" }}
-                      >
-                        Messege
-                      </Link>
-                    )}
-                  </div>
+                      {(isfollowed || isfollowing()) && (
+                        <div className="FollowBtn">
+                          <Link to="/chat" className="LinkBtn text-white">
+                            Messege
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-            <div className="DescContainer">
-              {" "}
-              {desc && <div className="UserAbout">{desc}</div>}
-            </div>
-            <div className="JoinDate">
-              {city && (
+              <div className="DescContainer">
+                {profile?.description && (
+                  <div className="UserAbout">{profile?.description}</div>
+                )}
+              </div>
+              <div className="JoinDate">
+                {profile?.city && (
+                  <span className="JoinItems">
+                    <Room className="mr-2" /> {profile?.city}
+                  </span>
+                )}
                 <span className="JoinItems">
-                  <RoomIcon className="IconSpace" /> {city}
+                  <Schedule className="mr-2" />
+                  {new Date(profile?.createdAt).toDateString()}
                 </span>
-              )}
-              <span className="JoinItems">
-                <ScheduleIcon className="IconSpace" />{" "}
-                {new Date(time).toDateString()}
-              </span>
+              </div>
+            </div>
+          </div>
+          <div className="ProfilePostWrapper">
+            <div ref={postScrollRef} className="ProfilePosts">
+              {!!posts?.length && <Cards NoLink={true} posts={posts} />}
             </div>
           </div>
         </div>
-        <div className="ProfilePostWrapper">
-          <div ref={myRef} className="ProfilePosts">
-            {posts && <Cards NoLink={true} posts={posts} />}
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

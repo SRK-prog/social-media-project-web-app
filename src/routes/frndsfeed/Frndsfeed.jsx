@@ -1,58 +1,35 @@
 import { useEffect } from "react";
-import { useContext } from "react";
 import { connect } from "react-redux";
 import Cards from "../../components/cards/Cards";
-import "./Frndspost.css";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Rightbox from "../../components/rightbox/Rightbox";
-import { Context } from "../../context/Context";
 import Skeleton from "../../components/Skeleton/Skeleton";
 import { fetchFriendsPosts } from "../../redux/actions";
 import Navlinks from "../../components/cards/Navlinks";
 
-function Frndsfeed({ posts, fetchFriendsPosts }) {
-  const { user } = useContext(Context);
-
+function Frndsfeed({ posts, fetchFriendsPosts, user }) {
   useEffect(() => {
-    document.title = "Mern | Post";
-  }, []);
-
-  useEffect(() => {
-    fetchFriendsPosts(user._id);
-  }, [fetchFriendsPosts, user._id]);
+    document.title = "Social Media | Post";
+    fetchFriendsPosts(user.accessToken);
+    // eslint-disable-next-line
+  }, [user.userId]);
 
   const RenderFrndsPosts = () => {
-    if (posts.length === 0) {
+    if (!posts.length) {
       return (
-        <div style={{ display: "flex", flexDirection: "column", flex: "6" }}>
+        <div className="flex flex-col flex-[6.5] md:px-0 px-2 mt-1.25">
           <Navlinks />
           {[1, 2, 3, 4, 5].map((i) => (
             <Skeleton key={i} />
           ))}
         </div>
       );
-    } else {
-      return <Cards posts={posts} />;
-      //  posts.includes("Nofrnds") ? (
-      //   <div
-      //     style={{
-      //       display: "flex",
-      //       flex: "6",
-      //       justifyContent: "center",
-      //       alignItems: "center",
-      //     }}
-      //   >
-      //     <Link to="/" className="NofrndsLink">
-      //       No Friends
-      //     </Link>
-      //   </div>
-      // ) : (
-      // );
     }
+    return <Cards posts={posts} />;
   };
 
   return (
-    <div className="FrndsfeedFlex">
+    <div className="flex bg-gray-70 max-w-360 mx-auto">
       <Sidebar />
       {RenderFrndsPosts()}
       <Rightbox />
@@ -60,8 +37,9 @@ function Frndsfeed({ posts, fetchFriendsPosts }) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return { posts: state.friendsPosts };
-};
+const mapStateToProps = (state) => ({
+  posts: state.friendsPosts,
+  user: state.user,
+});
 
 export default connect(mapStateToProps, { fetchFriendsPosts })(Frndsfeed);

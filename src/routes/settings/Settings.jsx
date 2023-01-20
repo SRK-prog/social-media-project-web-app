@@ -1,143 +1,133 @@
-import "./Settings.css";
+import { useState, useEffect } from "react";
 import { Button, TextField } from "@material-ui/core";
+import { useDispatch, useSelector } from "react-redux";
 import Sidebar from "../../components/sidebar/Sidebar";
-import { useContext, useState, useEffect } from "react";
-import { Context } from "../../context/Context";
 import axios from "axios";
 import { DEFAULT_AVATAR } from "../../constants/constants";
-import BASE_URL from "../../api/URL";
-import { useHistory } from "react-router-dom";
+import BASE_URL from "../../api/baseUrl";
+import { actionTypes } from "../../constants/constants";
+
+document.title = "Settings";
+
+const initialValue = {
+  profilepicture: "",
+  username: "",
+  email: "",
+  description: "",
+  city: "",
+};
+
+const { UPDATE_USER } = actionTypes;
 
 export default function Settings() {
-  const { user, dispatch } = useContext(Context);
-  const [desc, setDesc] = useState(user.desc);
-  const [username, setUsername] = useState(user.username);
-  const [city, setCity] = useState(user.city);
-  const [email, setEmail] = useState(user.email);
-  const [propic, setPropicurl] = useState("");
-  const history = useHistory();
+  const user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+
+  const [settingsState, setSettingsState] = useState(initialValue);
+
+  const onChangeHandler = (e) => {
+    const { name, value } = e.target;
+    setSettingsState((prev) => ({ ...prev, [name]: value }));
+  };
 
   useEffect(() => {
-    document.title = "settings";
-  }, []);
+    (async () => {
+      const select =
+        "username email profilepicture description city createdAt lastSeen";
+      try {
+        const { data } = await BASE_URL.get(`/users`, {
+          params: { userId: user.userId, select },
+        });
+        if (data?.response) setSettingsState(data?.response);
+      } catch (error) {}
+    })();
+  }, [user.userId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch({ type: "UPDATE_START" });
-    const updatedUser = {
-      userId: user._id,
-      profilepicture: propic,
-      username,
-      email,
-      desc,
-      city,
-    };
+    const updatedUser = { userId: user.userId, ...settingsState };
     try {
-      const res = await BASE_URL.put("/users/" + user._id, updatedUser);
-      res.data && history.push("/login");
+      const { data } = await BASE_URL.put("/users", updatedUser, {
+        headers: { Authorization: `Bearer ${user.accessToken}` },
+      });
+      if (data?.response)
+        dispatch({ type: UPDATE_USER, payload: data.response });
+    } catch (err) {}
+  };
+
+  const onImageChange = async (e) => {
+    const files = e.target.files[0];
+    const form = new FormData();
+    form.append("file", files);
+    form.append("upload_preset", "socialmedia-website");
+    form.append("cloud_name", "srksiva");
+    try {
+      const { data } = await axios.post(
+        "https://api.cloudinary.com/v1_1/srksiva/image/upload",
+        form
+      );
+      setSettingsState((p) => ({ ...p, profilepicture: data?.secure_url }));
     } catch (err) {
-      dispatch({ type: "UPDATE_FAILURE" });
+      console.log(err);
     }
   };
 
   return (
-    <div className="SettingsFlexBox">
+    <div className="flex max-w-360 mx-auto">
       <Sidebar />
-      <form className="SettingsContainer">
-        <div className="SetWrapper">
-          <div>
-            <h2 className="SetUser">User</h2>
+      <div className="relative flex-[7] md:px-10 px-4 mt-6">
+        <div className="rounded py-5 px-4 border border-[#8b8a8a]">
+          <div className="mb-6">
+            <h2 className="font-bold text-xl">User</h2>
           </div>
-          <div className="ForInputGap">
-            <TextField
-              type="text"
-              label="Name"
-              focused
-              placeholder={user.username}
-              fullWidth
-              variant="outlined"
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-          <div className="ForInputGap">
-            <TextField
-              type="email"
-              label="email"
-              placeholder={user.email}
-              focused
-              fullWidth
-              variant="outlined"
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="ForInputGap InputStraight">
+          <Field
+            label="Name"
+            name="username"
+            placeholder={settingsState.username}
+            onChange={onChangeHandler}
+          />
+          <Field
+            label="email"
+            name="email"
+            placeholder={settingsState.email}
+            onChange={onChangeHandler}
+          />
+          <div className="mt-6 flex items-center gap-4">
             <img
-              className="ProInput_Img"
-              src={propic ? propic : user.profilepicture || DEFAULT_AVATAR}
+              className="w-12 h-12 rounded-full object-cover"
+              src={settingsState.profilepicture || DEFAULT_AVATAR}
               alt=""
             />
             <input
               className="ProPhotoInput"
               type="file"
               accept="image/png, image/jpeg, image/jpg"
-              onChange={async (e) => {
-                const files = e.target.files[0];
-                const data = new FormData();
-                data.append("file", files);
-                data.append("upload_preset", "socialmedia-website");
-                data.append("cloud_name", "srksiva");
-                try {
-                  const prores = await axios.post(
-                    "https://api.cloudinary.com/v1_1/srksiva/image/upload",
-                    data
-                  );
-
-                  setPropicurl(prores.data.secure_url);
-                } catch (err) {
-                  console.log(err);
-                }
-              }}
+              onChange={onImageChange}
             />
           </div>
         </div>
-        <div className="SetWrapper">
-          <div>
-            <h2 className="SetUser">About</h2>
+        <div className="rounded py-5 px-4 border border-[#8b8a8a] mt-6">
+          <div className="mb-6">
+            <h2 className="font-bold text-xl">About</h2>
           </div>
-          <div className="ForInputGap">
-            <TextField
-              type="text"
-              label="Bio"
-              placeholder={user.desc}
-              focused
-              fullWidth
-              // value={desc}
-              variant="outlined"
-              onChange={(e) => setDesc(e.target.value)}
-            />
-          </div>
-          <div className="ForInputGap">
-            <TextField
-              type="text"
-              label="City"
-              placeholder={user.city}
-              fullWidth
-              focused
-              variant="outlined"
-              onChange={(e) => setCity(e.target.value)}
-            />
-          </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
+          <Field
+            label="Bio"
+            name="description"
+            placeholder={settingsState.description}
+            onChange={onChangeHandler}
+          />
+          <Field
+            label="City"
+            name="city"
+            placeholder={settingsState.city}
+            onChange={onChangeHandler}
+          />
+          <div className="flex justify-end mt-6">
             <Button
               onClick={handleSubmit}
               variant="contained"
               style={{
-                backgroundColor: "rgb(47, 224, 255)",
+                backgroundColor: "rgb(0, 190, 255)",
                 color: "white",
               }}
             >
@@ -145,8 +135,15 @@ export default function Settings() {
             </Button>
           </div>
         </div>
-      </form>
-      <div className="SettingsRightFlex"></div>
+      </div>
     </div>
   );
 }
+
+const Field = (props) => {
+  return (
+    <div className="mt-6">
+      <TextField type="text" fullWidth focused variant="outlined" {...props} />
+    </div>
+  );
+};

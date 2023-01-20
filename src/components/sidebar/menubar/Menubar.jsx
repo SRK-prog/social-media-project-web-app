@@ -1,71 +1,77 @@
-import "./Menubar.css";
 import { Link } from "react-router-dom";
-import HomeIcon from "@material-ui/icons/Home";
-import ContactSupportIcon from "@material-ui/icons/ContactSupport";
-import GitHubIcon from "@material-ui/icons/GitHub";
-import TwitterIcon from "@material-ui/icons/Twitter";
-import PersonIcon from "@material-ui/icons/Person";
-import InfoIcon from "@material-ui/icons/Info";
-import LinkedInIcon from "@material-ui/icons/LinkedIn";
-import InstagramIcon from "@material-ui/icons/Instagram";
 import {
+  Home,
+  ContactSupport,
+  GitHub,
+  Twitter,
+  Person,
+  Info,
+  LinkedIn,
+  Instagram,
   Chat,
-  PlayCircleFilledOutlined,
   HelpOutline,
+  AddBox,
 } from "@material-ui/icons";
 
-export default function Menubar({ data }) {
+const menuItems = [
+  { name: "Create Post", to: "/write", Icon: AddBox },
+  { name: "Home", to: "/", Icon: Home },
+  { name: "Chats", to: "/chat", Icon: Chat },
+  { name: "Questions", to: "/contact", Icon: HelpOutline },
+  { name: "Sign In/Up", to: "/login", Icon: Person },
+  { name: "About", to: "/about", Icon: Info },
+  { name: "Contact", to: "/contact", Icon: ContactSupport },
+];
+
+const linkItems = [
+  {
+    to: "https://twitter.com/SRK_R_?t=58WfgjgrqabaZrXWBHTZkg&s=08",
+    Icon: Twitter,
+  },
+  {
+    to: "https://github.com/SRK-prog/",
+    Icon: GitHub,
+  },
+  {
+    to: "https://www.linkedin.com/in/sivaramakrishnan-r262/",
+    Icon: LinkedIn,
+  },
+  {
+    to: "https://www.instagram.com/siva.r12/",
+    Icon: Instagram,
+  },
+];
+
+export default function Menubar({ showSidebar, onClose }) {
   return (
-    <>
-      <div className={`Menubar ${data ? "NavActive" : ""}`}>
-        <div className="MenubarWrapper">
-          <ul className="MenubarList">
-            <Link to="/" className="MenubarListItem">
-              <HomeIcon className="MenubarIcon" />
-              <span className="MenubarListItemText">Home</span>
+    <div
+      className={`h-screen-cal-55 top-[55px] flex-[3] fixed w-[300px] overflow-y-auto duration-200 z-30 bg-gray-70 sidebar-scrollbar md:hidden ${
+        showSidebar ? "left-0" : "-left-[330px]"
+      }`}
+    >
+      <div className="p-4">
+        <ul className="flex flex-col gap-1 font-medium text-gray-80">
+          {menuItems.map(({ name, Icon, to }, idx) => (
+            <Link
+              key={idx}
+              to={to}
+              onClick={() => onClose(false)}
+              className="flex items-center duration-200 px-3 py-2.5 rounded gap-4 hover:bg-lightBlue-10 hover:text-blue-20"
+            >
+              <Icon />
+              <span>{name}</span>
             </Link>
-            <Link to="/chat" className="MenubarListItem">
-              <Chat className="MenubarIcon" />
-              <span className="MenubarListItemText">Chats</span>
-            </Link>
-            <Link to="/" className="MenubarListItem">
-              <PlayCircleFilledOutlined className="MenubarIcon" />
-              <span className="MenubarListItemText">Videos</span>
-            </Link>
-            <Link to="/contact" className="MenubarListItem">
-              <HelpOutline className="MenubarIcon" />
-              <span className="MenubarListItemText">Questions</span>
-            </Link>
-            <Link to="/login" className="MenubarListItem">
-              <PersonIcon className="MenubarIcon" />
-              <span className="MenubarListItemText">Sign In/Up</span>
-            </Link>
-            <Link to="/about" className="MenubarListItem">
-              <InfoIcon className="MenubarIcon" />
-              <span className="MenubarListItemText">about</span>
-            </Link>
-            <Link to="/contact" className="MenubarListItem">
-              <ContactSupportIcon className="MenubarIcon" />
-              <span className="MenubarListItemText">Contact</span>
-            </Link>
-          </ul>
-          <div className="IconList">
-            <a href="https://twitter.com/SRK_R_?t=58WfgjgrqabaZrXWBHTZkg&s=08">
-              <TwitterIcon className="IconsList" />
+          ))}
+        </ul>
+        <div className="flex mt-5 gap-1 mb-2 items-center justify-center">
+          {linkItems.map(({ Icon, to }, idx) => (
+            <a target="_blank" rel="noreferrer" key={idx} href={to}>
+              <Icon className="text-3xl text-gray-90 hover:text-[#353434]" />
             </a>
-            <a href="https://github.com/SRK-prog/">
-              <GitHubIcon className="IconsList" />
-            </a>
-            <a href="https://www.linkedin.com/in/sivaramakrishnan-r262/">
-              <LinkedInIcon className="IconsList" />
-            </a>
-            <a href="https://www.instagram.com/siva.r12/">
-              <InstagramIcon className="IconsList" />
-            </a>
-          </div>
-          <hr className="MenubarHr" />
+          ))}
         </div>
+        <hr className="py-5" />
       </div>
-    </>
+    </div>
   );
 }

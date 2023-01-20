@@ -1,0 +1,13 @@
+export const DEFAULT_AVATAR = "/images/avatar.png";
+export const PROFILE_AVATAR = "/images/profile-avatar.png";
+
+export const actionTypes = {
+  UPDATE_SOCKET: "UPDATE_SOCKET",
+  UPDATE_USER: "UPDATE_USER",
+  REMOVE_USER: "REMOVE_USER",
+};
+
+export const keyTypes = {
+  USER: "user",
+  ACCESS_TOKEN: "ACCESS_TOKEN",
+};

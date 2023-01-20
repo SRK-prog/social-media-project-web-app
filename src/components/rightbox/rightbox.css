@@ -1,9 +1,0 @@
-.rightFlex {
-  flex: 3;
-}
-
-@media only screen and (max-width: 950px) {
-  .rightFlex {
-    display: none;
-  }
-}
