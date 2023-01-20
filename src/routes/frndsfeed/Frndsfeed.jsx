@@ -1,21 +1,18 @@
-import { useEffect, useContext } from "react";
+import { useEffect } from "react";
 import { connect } from "react-redux";
 import Cards from "../../components/cards/Cards";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Rightbox from "../../components/rightbox/Rightbox";
-import { Context } from "../../context/Context";
 import Skeleton from "../../components/Skeleton/Skeleton";
 import { fetchFriendsPosts } from "../../redux/actions";
 import Navlinks from "../../components/cards/Navlinks";
 
-document.title = "Mern | Post";
-
-function Frndsfeed({ posts, fetchFriendsPosts }) {
-  const { user } = useContext(Context);
-
+function Frndsfeed({ posts, fetchFriendsPosts, user }) {
   useEffect(() => {
-    fetchFriendsPosts(user._id);
-  }, [fetchFriendsPosts, user._id]);
+    document.title = "Social Media | Post";
+    fetchFriendsPosts(user.accessToken);
+    // eslint-disable-next-line
+  }, [user.userId]);
 
   const RenderFrndsPosts = () => {
     if (!posts.length) {
@@ -40,8 +37,9 @@ function Frndsfeed({ posts, fetchFriendsPosts }) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return { posts: state.friendsPosts };
-};
+const mapStateToProps = (state) => ({
+  posts: state.friendsPosts,
+  user: state.user,
+});
 
 export default connect(mapStateToProps, { fetchFriendsPosts })(Frndsfeed);

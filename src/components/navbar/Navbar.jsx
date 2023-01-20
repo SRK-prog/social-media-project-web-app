@@ -1,23 +1,26 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Search, Close, Menu } from "@material-ui/icons";
-import "./Navbar.css";
-import { Context } from "../../context/Context";
+import { useDispatch, useSelector } from "react-redux";
 import Menubar from "../sidebar/menubar/Menubar";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 import BASE_URL from "../../api/baseUrl";
 import MobSearchDropdown from "./mobSearchDropdown";
 import ClickOutside from "../../common/components/clickOutside";
 import MenusDropdown from "./menusDropdown";
+import { actionTypes } from "../../constants/constants";
+
+const { REMOVE_USER } = actionTypes;
 
 export default function Navbar() {
+  const user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+
   const [showMenu, setShowMenu] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchterm, setSearchterm] = useState("");
   const [searchdata, setSearchdata] = useState([]);
-
-  const { user, dispatch } = useContext(Context);
 
   useEffect(() => {
     if (!searchterm) return;
@@ -32,10 +35,10 @@ export default function Navbar() {
     return () => clearTimeout(timeout);
   }, [searchterm]);
 
-  const handlelogout = () => dispatch({ type: "LOGOUT" });
+  const handlelogout = () => dispatch({ type: REMOVE_USER });
 
   return (
-    <div className="topbarContainer px-5">
+    <div className="h-[55px] shadow z-50 bg-white flex items-center sticky top-0 px-5">
       <div className="max-w-360 mx-auto flex items-center justify-between w-full">
         <div className="flex items-center">
           <div className="flex items-center justify-center gap-3">
@@ -67,15 +70,15 @@ export default function Navbar() {
               value={searchterm}
               onChange={(e) => setSearchterm(e.target.value.toLowerCase())}
             />
-            {!searchterm && <Search className="searchIcon" />}
+            {!searchterm && <Search className="ml-2 w-4 h-4 text-xs" />}
             {!!searchdata?.length && !!searchterm && (
               <div className="absolute top-12 left-0 bg-white w-full rounded p-1">
-                {searchdata.map(({ username }, idx) => (
+                {searchdata.map(({ username, _id }, idx) => (
                   <Link
                     key={idx}
                     onClick={() => setSearchterm("")}
                     className="hover:outline-1 hover:outline rounded px-2 py-1 hover:outline-lightBlue-20 hover:text-blue-30 block"
-                    to={`/profile/${username}`}
+                    to={`/profile/${_id}`}
                   >
                     {username}
                   </Link>
@@ -84,41 +87,44 @@ export default function Navbar() {
             )}
           </ClickOutside>
         </div>
-        <div className="topbarRight">
+        <div className="flex items-center text-white">
           <div className="flex items-center gap-4">
-            {user ? (
+            {user.isLoggedIn ? (
               <Link
                 to="/write"
-                className="styleLink md:block hidden duration-200 font-bold"
+                className="p-2.5 ml-2 text-blue-50 border-2 border-blue-50 no-underline rounded mr-2 text-sm cursor-pointer md:block hidden duration-200 font-bold hover:bg-[#2484dd] hover:text-white"
               >
                 Create Post
               </Link>
             ) : (
               <>
-                <Link to="/login" className="topbarLink  md:block hidden">
+                <Link
+                  to="/login"
+                  className="md:block hidden text-sm text-black-0 duration-200 hover:text-blue-50"
+                >
                   Log in
                 </Link>
-                <Link to="/signup" className="styleLink duration-200">
+                <Link
+                  to="/signup"
+                  className="p-2.5 ml-2 text-blue-50 border-2 border-blue-50 no-underline rounded mr-2 text-sm cursor-pointer duration-200 font-bold hover:bg-[#2484dd] hover:text-white"
+                >
                   Create account
                 </Link>
               </>
             )}
           </div>
-          {user && (
+          {user.isLoggedIn && (
             <div className="flex items-center gap-4 ml-3">
-              <div className="md:hidden">
+              <button
+                onClick={() => setShowSearch((p) => !p)}
+                className="md:hidden"
+              >
                 {!showSearch ? (
-                  <Search
-                    className="Icon"
-                    onClick={() => setShowSearch(true)}
-                  />
+                  <Search className="text-4xl text-[#817d7d]" />
                 ) : (
-                  <Close
-                    className="Icon"
-                    onClick={() => setShowSearch(false)}
-                  />
+                  <Close className="text-4xl text-[#817d7d]" />
                 )}
-              </div>
+              </button>
               <div className="relative cursor-pointer">
                 <img
                   src={user.profilepicture || DEFAULT_AVATAR}

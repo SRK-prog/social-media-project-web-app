@@ -43,6 +43,7 @@ module.exports = {
         20: "#2d82d1",
         30: "#3d89ee",
         40: "#1da1f3",
+        50: "#3a8fde",
       },
       lightBlue: {
         10: "#d6e8fa",

@@ -1,35 +1,33 @@
-import { useContext, useState } from "react";
-import "./write.css";
+import { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import axios from "axios";
 import { TextField } from "@material-ui/core";
 import ImageIcon from "@material-ui/icons/Image";
 import DoneIcon from "@material-ui/icons/Done";
 import Sidebar from "../../components/sidebar/Sidebar";
-import { Context } from "../../context/Context";
 import BASE_URL from "../../api/baseUrl";
+import { useSelector } from "react-redux";
 
 export default function Write() {
+  const user = useSelector((state) => state.user);
+
   const [title, setTitle] = useState("");
   const [description, setDesc] = useState("");
-  const { user } = useContext(Context);
   const [imageurl, setImageurl] = useState("");
-  const [loading, setLoading] = useState([
-    { success: false, load: false, fail: false },
-  ]);
+  const [loading, setLoading] = useState({
+    success: false,
+    load: false,
+    fail: false,
+  });
   const history = useHistory();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const newPost = {
-      userId: user._id,
-      username: user.username,
-      photo: imageurl,
-      title,
-      description,
-    };
+    const newPost = { photo: imageurl, title, description };
     try {
-      await BASE_URL.post("/posts", newPost);
+      await BASE_URL.post("/posts", newPost, {
+        headers: { Authorization: `Bearer ${user.accessToken}` },
+      });
       history.push("/");
     } catch (err) {
       console.log(err);
@@ -58,9 +56,9 @@ export default function Write() {
   };
 
   return (
-    <div className="WriteFlex max-w-360 mx-auto">
+    <div className="flex bg-gray-70 max-w-360 mx-auto">
       <Sidebar />
-      <div className="ForWrite">
+      <div className="bg-white mt-5 rounded flex-[5]">
         <form className="single-post p-4" onSubmit={handleSubmit}>
           <input
             type="file"
@@ -86,7 +84,7 @@ export default function Write() {
               <ImageIcon />
               Upload Image
               {loading.success && (
-                <span className="SuccessMsg">
+                <span className="ml-2 pt-2 text-[#06af06]">
                   <DoneIcon />
                 </span>
               )}
@@ -95,10 +93,12 @@ export default function Write() {
                   <img src="/images/loader.svg" alt="" />
                 </span>
               )}
-              {loading.fail && <span className="FailedMsg">Failed!</span>}
+              {loading.fail && (
+                <span className="ml-2 pt-2 text-[#ff0000]">Failed!</span>
+              )}
             </label>
           )}
-          <div className="writetext-box">
+          <div className="mt-5">
             <TextField
               type="text"
               label="Post Title"
@@ -107,7 +107,7 @@ export default function Write() {
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
-          <div className="writetext-box">
+          <div className="mt-5">
             <TextField
               type="text"
               fullWidth
@@ -118,17 +118,23 @@ export default function Write() {
               onChange={(e) => setDesc(e.target.value)}
             />
           </div>
-          <div className="Writepost-btns">
-            <Link to="/" className="linkback block">
+          <div className="mt-5 flex justify-end gap-3">
+            <Link
+              className="w-28 h-10 text-white text-base bg-[#3791f8ea] rounded grid place-content-center"
+              to="/"
+            >
               Back
             </Link>
-            <button type="submit" className="Writepost-btn">
+            <button
+              className="w-28 h-10 text-white text-base bg-[#3791f8ea] rounded grid place-content-center"
+              type="submit"
+            >
               Publish
             </button>
           </div>
         </form>
       </div>
-      <div className="WriteRightFlex"></div>
+      <div className="lg:flex-[2]"></div>
     </div>
   );
 }

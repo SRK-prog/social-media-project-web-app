@@ -1,10 +1,13 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Button, TextField } from "@material-ui/core";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { Close } from "@material-ui/icons";
 import { useForm } from "react-hook-form";
-import { Context } from "../../context/Context";
+import { actionTypes } from "../../constants/constants";
 import BASE_URL from "../../api/baseUrl";
+
+const { UPDATE_USER } = actionTypes;
 
 document.title = "Login";
 
@@ -15,21 +18,25 @@ export default function Login() {
     formState: { errors },
   } = useForm();
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { dispatch, isFetching } = useContext(Context);
+  const history = useHistory();
+
+  const dispatch = useDispatch();
 
   const onSubmit = async ({ email, password }) => {
-    dispatch({ type: "LOGIN_START" });
+    setIsLoading(true);
     try {
       const { data } = await BASE_URL.post("/auth/login", {
         email: email.toLowerCase(),
         password,
       });
-      dispatch({ type: "LOGIN_SUCCESS", payload: data });
-      data && window.location.replace("/");
+      dispatch({ type: UPDATE_USER, payload: data?.response });
+      history.push("/");
     } catch (error) {
-      setError(error?.response?.data || "Something went wrong!");
-      dispatch({ type: "LOGIN_FAILURE" });
+      setError(error?.response?.data?.message || "Something went wrong!");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -80,24 +87,35 @@ export default function Login() {
             })}
           />
         </div>
-        <div className="mt-4">
+        <div className="mt-5">
           <Button
             variant="contained"
             fullWidth
             className="h-10"
             style={{ color: "white", backgroundColor: "#3a8fde" }}
             type="submit"
-            disabled={isFetching}
+            disabled={isLoading}
           >
-            Login
+            {isLoading ? (
+              <div className="h-8 w-8">
+                <div className="circle-loader"></div>
+              </div>
+            ) : (
+              "Login"
+            )}
           </Button>
         </div>
         {!!error && (
-          <div className="text-red-10 text-xs my-2.5 text-center">{error}</div>
+          <div className="text-red-10 text-sm mb-1.5 mt-2.5 text-center">
+            {error}
+          </div>
         )}
-        <div className="text-center text-sm">
+        <div className="text-center text-sm mt-1">
           Don't have account
-          <Link className="underline underline-offset-1 ml-1" to="/signup">
+          <Link
+            to="/signup"
+            className="underline underline-offset-1 ml-1 text-[#4d4dab]"
+          >
             Sign Up
           </Link>
         </div>

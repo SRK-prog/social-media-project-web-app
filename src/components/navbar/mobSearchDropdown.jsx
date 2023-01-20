@@ -7,35 +7,33 @@ const SearchDropdown = ({ onChange, value, onClose, data }) => {
   return (
     <ClickOutside
       onClickOutside={onClose}
-      className="absolute bg-white w-full top-14 md:hidden left-0"
+      className="absolute bg-white w-full top-[54px] shadow-md md:hidden left-0"
     >
-      <div className="SearchBoxWrapers">
-        <span className="SearchPopUpInputBox">
+      <div className="flex items-center pb-2 pt-5 px-4 gap-3">
+        <span className="w-[90%]">
           <input
             type="text"
-            className="SearchPopUpInput"
+            className="w-full rounded py-2 px-3 border border-[#747272] focus:outline-none"
             placeholder="Search..."
             value={value}
-            onChange={(e) => {
-              onChange(e.target.value.toLowerCase());
-            }}
+            onChange={(e) => onChange(e.target.value)}
           />
         </span>
         <div>
-          <Search className="SearchPopUpBtn" />
+          <Search className="text-[#817d7d]" />
         </div>
       </div>
-      {!!data?.length && (
+      {!!data?.length && !!value && (
         <div className="flex flex-col py-3 px-2">
-          {data.map(({ username }, idx) => (
+          {data.map(({ username, _id }, idx) => (
             <Link
               key={idx}
-              className="searchNameLinks responsive block w-full"
+              className="hover:outline-1 hover:outline rounded px-2 py-1 hover:outline-lightBlue-20 hover:text-blue-30 block w-full"
               onClick={() => {
                 onChange("");
                 onClose(false);
               }}
-              to={`/profile/${username}`}
+              to={`/profile/${_id}`}
             >
               {username}
             </Link>

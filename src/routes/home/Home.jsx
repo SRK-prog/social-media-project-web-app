@@ -4,14 +4,10 @@ import Cards from "../../components/cards/Cards";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Rightbox from "../../components/rightbox/Rightbox";
 import Nonuser from "../../components/nonuser/Nonuser";
-import { Context } from "../../context/Context";
-import { useContext } from "react";
 import Skeleton from "../../components/Skeleton/Skeleton";
 import { fetchPosts } from "../../redux/actions";
 
-function Home({ posts, fetchPosts }) {
-  const { user } = useContext(Context);
-
+function Home({ posts, fetchPosts, user }) {
   useEffect(() => {
     document.title = "Social Media";
     fetchPosts();
@@ -26,7 +22,7 @@ function Home({ posts, fetchPosts }) {
             <Skeleton key={k} />
           ))}
         </div>
-      ) : user ? (
+      ) : user.isLoggedIn ? (
         <Cards posts={posts} />
       ) : (
         <Nonuser posts={posts} />
@@ -35,6 +31,6 @@ function Home({ posts, fetchPosts }) {
     </div>
   );
 }
-const mapStateToProps = (state) => ({ posts: state.posts });
+const mapStateToProps = (state) => ({ posts: state.posts, user: state.user });
 
 export default connect(mapStateToProps, { fetchPosts })(Home);

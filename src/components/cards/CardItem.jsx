@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useHistory } from "react-router-dom";
 import moment from "moment";
 import {
@@ -7,29 +7,29 @@ import {
   ShareOutlined,
   Favorite,
 } from "@material-ui/icons";
-import { Context } from "../../context/Context";
 import BASE_URL from "../../api/baseUrl";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 import useSingleAndDoubleClick from "../../hooks/useSingleAndDoubleClick";
 
-const CardItem = ({ post }) => {
+const CardItem = ({ post, user }) => {
   const [like, setLike] = useState(post.likes.length);
   const [isLiked, setIsLiked] = useState(false);
-  const { user: currentUser } = useContext(Context);
   const history = useHistory();
 
   useEffect(() => {
-    setIsLiked(post.likes.includes(currentUser._id));
-  }, [currentUser._id, post.likes]);
+    setIsLiked(post.likes.includes(user.userId));
+  }, [user.userId, post.likes]);
 
   const likeHandler = () => {
     try {
-      BASE_URL.put("/posts/" + post._id + "/like", {
-        userId: currentUser._id,
-      });
+      BASE_URL.put(
+        "/posts/like",
+        { postId: post._id },
+        { headers: { Authorization: `Bearer ${user.accessToken}` } }
+      );
     } catch (err) {}
-    setLike(isLiked ? like - 1 : like + 1);
-    setIsLiked(!isLiked);
+    setLike((prevLikes) => (isLiked ? prevLikes - 1 : prevLikes + 1));
+    setIsLiked((p) => !p);
   };
 
   const handleOnPostClick = useSingleAndDoubleClick(
@@ -40,10 +40,7 @@ const CardItem = ({ post }) => {
   return (
     <div className="mt-2 rounded-lg bg-white border border-gray-100 py-2.5">
       <div className="px-3">
-        <Link
-          to={`/profile/${post?.user?.username}`}
-          className="flex gap-2.5 pb-2"
-        >
+        <Link to={`/profile/${post?.user?._id}`} className="flex gap-2.5 pb-2">
           <div>
             <img
               className="h-10 w-10 object-cover rounded-full"
@@ -51,8 +48,8 @@ const CardItem = ({ post }) => {
               alt=""
             />
           </div>
-          <div className="NameDate">
-            <div className="postUserdate">{post?.user?.username}</div>
+          <div>
+            <div>{post?.user?.username}</div>
             <div className="text-darkGray-10 text-xs">
               {moment(post.createdAt).fromNow()}
             </div>

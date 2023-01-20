@@ -1,4 +1,4 @@
-import { useEffect, useContext, lazy, Suspense } from "react";
+import { useEffect, lazy, Suspense, useRef } from "react";
 import {
   BrowserRouter as Router,
   Switch,
@@ -9,7 +9,6 @@ import { connect } from "react-redux";
 import { io } from "socket.io-client";
 import Loader from "./common/components/loader";
 import Navbar from "./components/navbar/Navbar";
-import { Context } from "./context/Context";
 import Utils from "./utils";
 import { actionTypes } from "./constants/constants";
 import { Toaster } from "react-hot-toast";
@@ -31,39 +30,47 @@ const About = lazy(() => import("./routes/about/About"));
 
 const { UPDATE_SOCKET } = actionTypes;
 
-function App({ dispatch, socket }) {
-  const { user } = useContext(Context);
+function App({ dispatch, socket, user }) {
+  const isVisible = useRef(true);
 
   useEffect(() => {
-    (async () => {
-      try {
-        await Utils.requestNotificationAccess();
-      } catch (error) {
-        console.warn("Notification error", error);
-      }
-    })();
+    try {
+      Utils.requestNotificationAccess();
+    } catch (error) {
+      console.warn("Notification error", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    const onChange = () => {
+      const state = document.visibilityState;
+      if (state === "visible") isVisible.current = true;
+      if (state === "hidden") isVisible.current = false;
+    };
+    document.addEventListener("visibilitychange", onChange);
+    return () => document.removeEventListener("visibilitychange", onChange);
   }, []);
 
   const showNotication = (data) => {
-    notifyToast(data);
-    Utils.openNotification({
-      title: data?.username,
-      message: data?.text || "",
-      icon: data?.profilepicture,
-    });
+    if (isVisible.current) {
+      const chatId = window.chatId || "";
+      if (chatId !== data?.conversationId) notifyToast(data);
+    } else {
+      Utils.openNotification({
+        title: data?.username,
+        message: data?.text || "",
+        icon: data?.profilepicture,
+      });
+    }
   };
 
   useEffect(() => {
-    (async () => {
-      try {
-        if (socket.connected) {
-          socket.on("message", async (data) => {
-            publish("message", data);
-            showNotication(data);
-          });
-        }
-      } catch (err) {}
-    })();
+    if (socket.connected) {
+      socket.on("message", async (data) => {
+        publish("message", data);
+        showNotication(data);
+      });
+    }
     return () => {
       if (socket.connect) socket.off("message");
     };
@@ -73,7 +80,7 @@ function App({ dispatch, socket }) {
   const connect = async () => {
     if (socket.connected) return;
     const socketIo = io(process.env.REACT_APP_CHAT_SOCKET_URL, {
-      query: { id: user?._id },
+      query: { id: user?.userId },
     });
     socketIo.once("connect", () => {
       socketIo.emit("join", "", () => {});
@@ -88,12 +95,12 @@ function App({ dispatch, socket }) {
   };
 
   useEffect(() => {
-    if (user?._id) connect();
+    if (user?.userId) connect();
     return () => {
       if (socket?.connected) socket.disconnect();
     };
     // eslint-disable-next-line
-  }, [user?._id]);
+  }, [user?.userId]);
 
   return (
     <Router>
@@ -106,28 +113,36 @@ function App({ dispatch, socket }) {
           <Route path="/error404" component={Error404} />
           <Route path="/contact" component={Contact} />
           <Route path="/about" component={About} />
-          <ProtectedRoute isLoggedIn={user} path="/write" component={Write} />
           <ProtectedRoute
-            isLoggedIn={user}
+            isLoggedIn={user.isLoggedIn}
+            path="/write"
+            component={Write}
+          />
+          <ProtectedRoute
+            isLoggedIn={user.isLoggedIn}
             path="/postdetails/:postId"
             component={SinglePost}
           />
           <ProtectedRoute
-            isLoggedIn={user}
+            isLoggedIn={user.isLoggedIn}
             path="/profile/:username"
             component={Profile}
           />
           <ProtectedRoute
-            isLoggedIn={user}
+            isLoggedIn={user.isLoggedIn}
             path="/feeds"
             component={Frndsfeed}
           />
           <ProtectedRoute
-            isLoggedIn={user}
+            isLoggedIn={user.isLoggedIn}
             path="/settings"
             component={Settings}
           />
-          <ProtectedRoute isLoggedIn={user} path="/chat" component={Chatapp} />
+          <ProtectedRoute
+            isLoggedIn={user.isLoggedIn}
+            path="/chat"
+            component={Chatapp}
+          />
           <Redirect exact from="*" to="/error404" />
         </Switch>
         <Toaster position="bottom-right" reverseOrder={false} />
@@ -142,6 +157,7 @@ const ProtectedRoute = ({ component: Component, isLoggedIn, ...rest }) => {
 
 const mapStateToProps = (state) => ({
   socket: state.socket.socket,
+  user: state.user,
 });
 
 const dispatch = Utils.dispatch;

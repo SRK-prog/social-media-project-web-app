@@ -20,10 +20,7 @@ const Conversations = (props) => {
   } = props;
   const [isOnline, setIsOnline] = useState(false);
   const [messages, setMessages] = useState([]);
-  const [justNowLeaved, setJustNowLeaved] = useState({
-    status: false,
-    lastSeen: 0,
-  });
+  const [justLeaved, setJustLeaved] = useState({ status: false, lastSeen: 0 });
   const [loading, setLoading] = useState(true);
 
   const prevConvId = usePrevious(currentChat?._id);
@@ -34,20 +31,23 @@ const Conversations = (props) => {
   const pageState = useRef({
     total: 0,
     page: 0,
-    loading: false,
+    loading: true,
     conversationId: currentChat?._id,
     receiverId: receiverId,
   });
 
+  const setPageState = (obj) => {
+    pageState.current = { ...pageState.current, ...obj };
+  };
+
   useEffect(() => {
-    pageState.current.conversationId = currentChat?._id;
-    pageState.current.receiverId = receiverId;
+    window.chatId = currentChat?._id;
+    setPageState({ conversationId: currentChat?._id, receiverId: receiverId });
+    // eslint-disable-next-line
   }, [currentChat?._id, receiverId]);
 
-  const loadingStatus = useRef(true);
   const totalPages = useRef(0);
   const pageCount = useRef(0);
-  const convId = useRef(currentChat?._id);
 
   const fetchMessages = async (params) => {
     try {
@@ -65,9 +65,7 @@ const Conversations = (props) => {
 
   useEffect(() => {
     (async () => {
-      window.chatId = currentChat?._id;
-      convId.current = currentChat?._id;
-      if (prevConvId && prevConvId !== currentChat?._id) {
+      if ((prevConvId || "") !== currentChat?._id) {
         setMessages([]);
         pageCount.current = 0;
         totalPages.current = 0;
@@ -87,14 +85,14 @@ const Conversations = (props) => {
     const [data] = await fetchMessages({
       skip: pageCount.current,
       limit: 30,
-      conversationId: convId.current,
+      conversationId: pageState.current.conversationId,
     });
     setMessages((p) => [...p, ...data]);
   };
 
   const handleObserver = useCallback((entries) => {
     const [target] = entries;
-    if (target.isIntersecting && !loadingStatus.current) {
+    if (target.isIntersecting && !pageState.current.loading) {
       const count = pageCount.current;
       if (totalPages.current !== count) {
         pageCount.current = count + 1;
@@ -131,16 +129,14 @@ const Conversations = (props) => {
   useEffect(() => {
     if (socket.connected) {
       socket.on("user_disconnect", (data) => {
-        console.log("receiverId: ", receiverId);
-        const isCurrentUserChat = data.offline === receiverId;
-        setJustNowLeaved({
-          status: isCurrentUserChat,
-          lastSeen: Date.now(),
-        });
-        setIsOnline((prev) => (isCurrentUserChat ? false : prev));
+        const recId = pageState.current.receiverId;
+        const isCurrentUserChat = data.offline === recId;
+        setJustLeaved({ status: isCurrentUserChat, lastSeen: Date.now() });
+        if (isCurrentUserChat) setIsOnline(false);
       });
       socket.on("user_status", (data) => {
-        setIsOnline((prev) => (data.online === receiverId ? true : prev));
+        const isCurrentUserChat = data.online === pageState.current.receiverId;
+        if (isCurrentUserChat) setIsOnline(true);
       });
     }
 
@@ -152,7 +148,7 @@ const Conversations = (props) => {
 
   const updateLoading = (value) => {
     setLoading(value);
-    loadingStatus.current = value;
+    setPageState({ loading: value });
   };
 
   useEffect(() => {
@@ -161,6 +157,8 @@ const Conversations = (props) => {
       try {
         socket.emit("user_status", { id: receiverId }, ({ response }) => {
           setIsOnline(response?.online);
+          // if (response && !response?.online)
+          //   setJustLeaved({ status: false, lastSeen: currentChat?.lastSeen });
         });
       } catch (err) {
         console.log(err);
@@ -180,24 +178,24 @@ const Conversations = (props) => {
   const handleSubmit = async (text) => {
     if (!text.trim()) return;
     const message = {
-      sender: user._id,
+      sender: user.userId,
       text: text,
       conversationId: currentChat._id,
+      createdAt: Date.now(),
+      receiver: receiverId,
     };
-    onSent({ text, sender: user._id, receiver: receiverId });
+    onSent(message);
     scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
     const promise = emitMessage({
       ...message,
-      receiver: receiverId,
       profilepicture: user?.profilepicture,
       username: user?.username,
-      createdAt: Date.now(),
     });
 
     try {
       setMessages((prev) => [
-        { ...message, _id: Date.now(), createdAt: Date.now(), promise },
+        { ...message, _id: Date.now(), promise },
         ...prev,
       ]);
       await BASE_URL.post("/messages", message);
@@ -210,15 +208,15 @@ const Conversations = (props) => {
     return isOnline
       ? "online"
       : `Last seen ${
-          justNowLeaved.status
-            ? Utils.formatDate(justNowLeaved?.lastSeen)
+          justLeaved.status
+            ? Utils.formatDate(justLeaved?.lastSeen)
             : Utils.formatDate(currentChat?.lastSeen)
         }`;
   };
 
   const showSent = (msg, idx) => {
     return (
-      msg?.sender === user?._id &&
+      msg?.sender === user?.userId &&
       !!msg?.promise &&
       messages[idx]?._id === msg?._id
     );
@@ -251,7 +249,7 @@ const Conversations = (props) => {
       )}
       {loading && (
         <div className="h-10 w-10 absolute top-20 right-0 left-0 mx-auto shadow-md p-1 rounded-full">
-          <div className="circle-topEndRef"></div>
+          <div className="circle-loader"></div>
         </div>
       )}
       <div className="h-full overflow-y-auto px-2.5 my-4 custom-scrollbar flex flex-col-reverse">
@@ -261,7 +259,7 @@ const Conversations = (props) => {
             <Message
               showSent={showSent(m, idx)}
               message={m}
-              own={m.sender === user._id}
+              own={m.sender === user.userId}
             />
           </div>
         ))}

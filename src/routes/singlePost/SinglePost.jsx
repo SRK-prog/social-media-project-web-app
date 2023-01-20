@@ -1,5 +1,4 @@
-import { useContext, useEffect, useState } from "react";
-import "./SinglePost.css";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { TextField, Button } from "@material-ui/core";
 import {
@@ -13,34 +12,38 @@ import {
 import moment from "moment";
 import { useLocation } from "react-router";
 import { useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Sidebar from "../../components/sidebar/Sidebar";
-import { Context } from "../../context/Context";
 import Comments from "../../components/comments/Comments";
 import BASE_URL from "../../api/baseUrl";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 
 export default function SinglePost() {
+  const user = useSelector((state) => state.user);
+
   const [post, setPost] = useState({});
   const [like, setLike] = useState(0);
-  const location = useLocation();
-  const path = location.pathname.split("/")[2];
   const [isLiked, setIsLiked] = useState(false);
-  const { user } = useContext(Context);
   const [title, setTitle] = useState("");
-  const [desc, setDesc] = useState("");
+  const [description, setDesc] = useState("");
   const [updateMode, setUpdateMode] = useState(false);
   const [comments, setComments] = useState([]);
-
-  // Comments Toggle Button
   const [commentsbtn, setCommentsbtn] = useState(true);
-  const [newcomment, setNewcomment] = useState();
+  const [newcomment, setNewcomment] = useState("");
+
+  const location = useLocation();
+  const path = location.pathname.split("/")[2];
   const history = useHistory();
 
   const likeHandler = () => {
     setLike((prevLikes) => (isLiked ? prevLikes - 1 : prevLikes + 1));
     setIsLiked((p) => !p);
     try {
-      BASE_URL.put("/posts/" + post?._id + "/like", { userId: user?._id });
+      BASE_URL.put(
+        "/posts/like",
+        { postId: post?._id },
+        { headers: { Authorization: `Bearer ${user.accessToken}` } }
+      );
     } catch (err) {}
   };
 
@@ -57,22 +60,27 @@ export default function SinglePost() {
 
   useEffect(() => {
     const getPost = async () => {
-      const { data } = await BASE_URL.get("/posts/" + path);
-      setPost(data);
-      setTitle(data.title);
-      setDesc(data.description);
-      setLike(data.likes.length);
-      setIsLiked(data.likes.includes(user._id));
+      const {
+        data: { response },
+      } = await BASE_URL.get("/posts", {
+        params: { postId: path },
+      });
+      setPost(response);
+      setTitle(response.title);
+      setDesc(response.description);
+      setLike(response.likes.length);
+      setIsLiked(response.likes.includes(user.userId));
     };
     getPost();
     fetchComments();
     // eslint-disable-next-line
-  }, [path, user._id]);
+  }, [path, user.userId]);
 
   const handleDelete = async () => {
     try {
-      await BASE_URL.delete(`/posts/${post?._id}`, {
-        data: { username: user.username },
+      await BASE_URL.delete(`/posts`, {
+        data: { postId: post?._id },
+        headers: { Authorization: `Bearer ${user.accessToken}` },
       });
       history.push("/");
     } catch (err) {}
@@ -80,11 +88,11 @@ export default function SinglePost() {
 
   const handleUpdate = async () => {
     try {
-      await BASE_URL.put(`/posts/${post?._id}`, {
-        username: user.username,
-        description: desc,
-        title,
-      });
+      await BASE_URL.put(
+        `/posts`,
+        { postId: post?._id, title, description },
+        { headers: { Authorization: `Bearer ${user.accessToken}` } }
+      );
       setUpdateMode(false);
     } catch (err) {}
   };
@@ -92,7 +100,7 @@ export default function SinglePost() {
   const handlecommentSubmit = async (e) => {
     e.preventDefault();
     const postComment = {
-      postId: path,
+      postId: post?._id,
       userId: user._id,
       comment: newcomment,
     };
@@ -100,15 +108,14 @@ export default function SinglePost() {
       ...prev,
       {
         ...postComment,
-        user: {
-          username: user?.username,
-          profilepicture: user?.profilepicture,
-        },
+        user: { username: user.username, profilepicture: user.profilepicture },
       },
     ]);
     setNewcomment("");
     try {
-      BASE_URL.post("/comments", postComment);
+      BASE_URL.post("/comments", postComment, {
+        headers: { Authorization: `Bearer ${user.accessToken}` },
+      });
     } catch (err) {}
   };
 
@@ -119,7 +126,7 @@ export default function SinglePost() {
         <div className="mt-2 rounded-lg bg-white border border-gray-100 py-2.5">
           <div className="flex justify-between px-2.5 items-center">
             <Link
-              to={`/profile/${post.username}`}
+              to={`/profile/${post?.user?.username}`}
               className="flex gap-2.5 pb-2"
             >
               <div>
@@ -130,56 +137,59 @@ export default function SinglePost() {
                 />
               </div>
               <div>
-                <div className="">{post?.username}</div>
-                <div className="spostDate">
+                <div>{post?.user?.username}</div>
+                <div className="text-darkGray-10 text-xs">
                   {moment(post?.createdAt).fromNow()}
                 </div>
               </div>
             </Link>
-            {post?.userId === user?._id && (
-              <span className="EditPosition">
-                <MoreVert
-                  className="Editbtn"
-                  onClick={() => setUpdateMode((p) => !p)}
-                />
-              </span>
+            {post?.userId === user?.userId && (
+              <button onClick={() => setUpdateMode((p) => !p)}>
+                <MoreVert />
+              </button>
             )}
           </div>
           <div>
             {post.photo && (
-              <img className="smain-pic" src={post.photo} alt="" />
+              <img
+                className="md:max-h-92.5 max-h-77.5 w-full"
+                src={post.photo}
+                alt=""
+              />
             )}
           </div>
-          <span className="sAlink">
+          <span>
             {updateMode ? (
               <>
-                <div className="singlePostTitleInput">
-                  <TextField
-                    type="text"
-                    label="Title of post"
-                    variant="outlined"
-                    fullWidth
-                    value={title}
-                    className="singlePostTitle"
-                    autoFocus
-                    onChange={(e) => setTitle(e.target.value)}
-                  />
-                  <TextField
-                    label="Description"
-                    value={desc}
-                    variant="outlined"
-                    fullWidth
-                    multiline
-                    minRows={4}
-                    className="singlePostTitle"
-                    onChange={(e) => setDesc(e.target.value)}
-                  />
+                <div className="mx-6 my-6">
+                  <div className="mt-4">
+                    <TextField
+                      type="text"
+                      label="Title of post"
+                      variant="outlined"
+                      fullWidth
+                      value={title}
+                      autoFocus
+                      onChange={(e) => setTitle(e.target.value)}
+                    />
+                  </div>
+                  <div className="mt-4">
+                    <TextField
+                      label="Description"
+                      value={description}
+                      variant="outlined"
+                      fullWidth
+                      multiline
+                      minRows={4}
+                      onChange={(e) => setDesc(e.target.value)}
+                    />
+                  </div>
                 </div>
                 <div className="flex justify-end gap-4 px-5 mb-5">
                   <Button
                     variant="contained"
                     style={{
-                      backgroundColor: "rgb(47, 224, 255)",
+                      backgroundColor: "rgb(0, 190, 255)",
                       color: "white",
                     }}
                     onClick={handleDelete}
@@ -189,7 +199,7 @@ export default function SinglePost() {
                   <Button
                     variant="contained"
                     style={{
-                      backgroundColor: "rgb(47, 224, 255)",
+                      backgroundColor: "rgb(0, 190, 255)",
                       color: "white",
                     }}
                     onClick={handleUpdate}
@@ -199,10 +209,14 @@ export default function SinglePost() {
                 </div>
               </>
             ) : (
-              <>
-                <div className="sPostTitle">{title}</div>
-                <div className="sPostDesc">{desc}</div>
-              </>
+              <div className="md:px-6 px-4">
+                <div className="mt-2 md:text-3xl text-xl font-medium">
+                  {title}
+                </div>
+                <div className="text-black mt-2 mb-2 trucate-word">
+                  {description}
+                </div>
+              </div>
             )}
 
             <div className="flex items-center justify-between px-5 mb-5">
@@ -233,7 +247,9 @@ export default function SinglePost() {
           </span>
 
           <div
-            className={`CommentsSpacing px-8 ${commentsbtn ? "activecom" : ""}`}
+            className={`px-8 border-t border-gray-100 my-5 ${
+              !commentsbtn && "hidden"
+            }`}
           >
             <h2 className="my-8 text-2xl font-bold">Comments</h2>
             <form

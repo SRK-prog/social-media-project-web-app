@@ -10,8 +10,8 @@ const MenusDropdown = ({ onClose, user, onLogout }) => {
     >
       <Link
         onClick={() => onClose(false)}
-        to={`/profile/${user.username}`}
-        className="linkListprofile px-1.5 duration-200"
+        to={`/profile/${user.userId}`}
+        className="text-black-0 rounded-sm no-underline border-b border-gray-60 px-1.5 pb-1 hover:bg-lightBlue-10 hover:text-blue-20 duration-200"
       >
         <div className="font-medium text-xl">{user?.username}</div>
         <div className="text-sm">@{user?.username}</div>
@@ -19,19 +19,19 @@ const MenusDropdown = ({ onClose, user, onLogout }) => {
       <Link
         onClick={() => onClose(false)}
         to="/write"
-        className="linkListItems duration-200"
+        className="text-black-0 text-sm font-medium rounded-sm no-underline px-1.5 py-1.5 hover:bg-lightBlue-10 hover:text-blue-20 duration-200"
       >
         Create post
       </Link>
       <Link
         onClick={() => onClose(false)}
         to="/settings"
-        className="linkListItems duration-200"
+        className="text-black-0 text-sm font-medium rounded-sm no-underline px-1.5 py-1.5 hover:bg-lightBlue-10 hover:text-blue-20 duration-200"
       >
         Settings
       </Link>
       <button
-        className="text-black-0 text-base bg-white duration-200"
+        className="text-black-0 text-sm font-medium text-left rounded-sm no-underline px-1.5 py-1.5 hover:bg-lightBlue-10 hover:text-blue-20 duration-200"
         onClick={onLogout}
       >
         Sign Out

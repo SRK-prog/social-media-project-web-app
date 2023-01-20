@@ -12,13 +12,13 @@ function Conversation({ conversation, currentUser, isActive, onSelect }) {
   const [user, setUser] = useState({});
 
   useEffect(() => {
-    const friendId = conversation.members.find((m) => m !== currentUser._id);
+    const friendId = conversation.members.find((m) => m !== currentUser.userId);
     (async () => {
       try {
         const { data } = await BASE_URL.get("/users", {
           params: { userId: friendId },
         });
-        setUser(data);
+        if (data?.response) setUser(data.response);
       } catch (err) {
         console.log(err);
       }

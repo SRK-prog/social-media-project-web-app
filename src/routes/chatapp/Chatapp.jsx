@@ -1,40 +1,28 @@
-import { useContext, useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Conversation from "../../components/conversations/Conversation";
-import { Context } from "../../context/Context";
 import BASE_URL from "../../api/baseUrl";
 import Loader from "../../common/components/loader";
 import Conversations from "./Conversations";
 import { connect } from "react-redux";
 import { subscribe, unsubscribe } from "../../services/events";
 
-document.title = "Chat | Mern";
+document.title = "Social Media | Chat";
 
-const checkIdsIncludes = (array, idOne, idTwo) => {
-  return array.includes(idOne) && array.includes(idTwo);
-};
-
-function Chatapp({ socket }) {
+function Chatapp({ socket, user }) {
   const [conversations, setConversations] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [incomingMessage, setIncomingMessage] = useState({});
-  const { user } = useContext(Context);
 
   const convRef = useRef(null);
 
-  const addSortConversations = ({ sender, receiver, text }) => {
+  const addSortConversations = ({ conversationId, text, sender }) => {
     setConversations((prev) => {
       const temp = prev.map((i) =>
-        checkIdsIncludes(i.members, sender, receiver)
-          ? { ...i, text, sender: sender }
-          : i
+        conversationId === i?._id ? { ...i, text, sender: sender } : i
       );
       return temp.sort((x, y) =>
-        checkIdsIncludes(x.members, sender, receiver)
-          ? -1
-          : checkIdsIncludes(y.members, sender, receiver)
-          ? 1
-          : 0
+        conversationId === x?._id ? -1 : conversationId === y?._id ? 1 : 0
       );
     });
   };
@@ -48,7 +36,6 @@ function Chatapp({ socket }) {
     };
 
     subscribe("message", onMessage);
-
     return () => {
       unsubscribe("message", onMessage);
     };
@@ -57,24 +44,17 @@ function Chatapp({ socket }) {
 
   useEffect(() => {
     (async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        const { data } = await BASE_URL.get("/conversations/" + user._id);
-        setIsLoading(false);
+        const { data } = await BASE_URL.get("/conversations/" + user.userId);
         setConversations(data);
       } catch (err) {
-        setIsLoading(false);
         console.log(err);
+      } finally {
+        setIsLoading(false);
       }
     })();
-  }, [user._id]);
-
-  const isActiveConversation = (members) => {
-    const friendId = members.find((i) => i !== user._id);
-    return currentChat?.members
-      ? currentChat?.members.includes(friendId)
-      : false;
-  };
+  }, [user.userId]);
 
   const updateChat = (data) => {
     setCurrentChat(data);
@@ -87,7 +67,7 @@ function Chatapp({ socket }) {
     return (
       <div className="flex bg-gray-110 w-full max-w-360 mx-auto">
         <div
-          className={`md:sticky fixed md:block z-10 bg-white overflow-y-auto w-full flex-[3] h-screen-cal-55  custom-scrollbar ${
+          className={`md:sticky fixed md:block z-10 bg-white overflow-y-auto w-full flex-[3] h-screen-cal-55 custom-scrollbar ${
             !currentChat ? "block" : "hidden"
           }`}
         >
@@ -96,7 +76,7 @@ function Chatapp({ socket }) {
               <Conversation
                 key={c._id}
                 onSelect={updateChat}
-                isActive={isActiveConversation(c.members)}
+                isActive={c?._id === currentChat?._id}
                 conversation={c}
                 currentUser={user}
               />
@@ -112,7 +92,7 @@ function Chatapp({ socket }) {
                 socket={socket}
                 incomingMessage={incomingMessage}
                 onSent={addSortConversations}
-                receiverId={currentChat?.members.find((i) => i !== user._id)}
+                receiverId={currentChat?.members.find((i) => i !== user.userId)}
                 currentChat={currentChat}
                 onClose={() => updateChat(null)}
               />
@@ -137,6 +117,7 @@ function Chatapp({ socket }) {
 
 const mapStateToProps = (state) => ({
   socket: state.socket.socket,
+  user: state.user,
 });
 
 export default connect(mapStateToProps)(Chatapp);

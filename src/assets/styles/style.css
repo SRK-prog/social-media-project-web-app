@@ -38,6 +38,16 @@
   background: transparent;
 }
 
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgb(179, 179, 179);
+}
+
 .trucate-word {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -128,5 +138,175 @@
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+.ProfileImage {
+  height: 150px;
+  width: 150px;
+  z-index: 1;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 5px solid #a9b9b9;
+  top: 10px;
+  left: 22%;
+  transform: translate(-50%);
+  position: absolute;
+}
+
+.ProfileDetails {
+  width: 85%;
+  position: absolute;
+  border: 1px solid #999696;
+  top: 70px;
+  border-radius: 10px;
+  left: 50%;
+  background-color: white;
+  transform: translate(-50%);
+}
+
+.UserInfo {
+  display: flex;
+  width: 100%;
+  margin-top: 50px;
+  margin-bottom: 10px;
+}
+
+.UserName {
+  width: 30%;
+  margin-left: 5%;
+}
+
+.BtnSection {
+  width: 50%;
+  align-items: center;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.BtnWrper {
+  width: 70%;
+  display: flex;
+  justify-content: center;
+}
+
+.followingbutton {
+  background-color: #3a8fde;
+  color: white;
+  border-radius: 3px;
+  padding: 6px 14px;
+}
+
+.FollowBtn {
+  margin-top: 37px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.followbutton {
+  background-color: #3a8fde;
+  color: white;
+  border-radius: 3px;
+  padding: 6px 25px;
+}
+
+.followbackbutton {
+  background-color: #3a8fde;
+  color: white;
+  border-radius: 3px;
+  padding: 6px 7px;
+}
+
+.followbackbutton:hover,
+.followingbutton:hover,
+.followbutton:hover,
+.LinkBtn:hover {
+  box-shadow: 1px 1px 4px 1px #00000031;
+  background-color: #2f8be0;
+}
+
+.LinkBtn {
+  background-color: #3a8fde;
+  border-radius: 3px;
+  padding: 6px 16px;
+}
+
+.DescContainer {
+  display: flex;
+  justify-content: center;
+  margin: 15px 0;
+}
+
+.FollowFlex {
+  display: flex;
+  width: 100%;
+}
+
+.FollowFlexBox {
+  width: 30%;
+}
+
+.FollowCounts {
+  width: 70%;
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: 15px;
+}
+
+.Follows {
+  text-align: center;
+}
+
+.JoinDate {
+  width: 100%;
+  display: flex;
+  padding: 0 20px;
+  justify-content: space-evenly;
+  margin-bottom: 25px;
+}
+
+.JoinItems {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  color: rgb(100, 98, 98);
+}
+
+.ProfilePostWrapper {
+  margin-top: 250px;
+  display: flex;
+  justify-content: center;
+}
+
+.ProfilePosts {
+  width: 70%;
+}
+
+@media (max-width: 700px) {
+  .ProfileDetails {
+    width: 100%;
+  }
+  .ProfilePosts {
+    width: 100%;
+  }
+  .ProfileImage {
+    height: 80px;
+    width: 80px;
+    top: 30px;
+    left: 60px;
+  }
+  .UserInfo {
+    margin-top: 5px;
+  }
+  .JoinDate {
+    line-height: 2rem;
+    flex-direction: column;
+  }
+  .DescContainer {
+    justify-content: left;
+    padding: 0 20px;
+  }
+  .ProfilePostWrapper {
+    margin-top: 200px;
   }
 }

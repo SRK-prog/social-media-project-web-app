@@ -1,4 +1,3 @@
-import "./sidebar.css";
 import { Link } from "react-router-dom";
 import {
   Home,
@@ -45,8 +44,8 @@ const linkItems = [
 
 export default function Sidebar() {
   return (
-    <div className="sidebar md:block hidden">
-      <div className="sidebarWrapper">
+    <div className="h-screen-cal-55 top-[55px] flex-[3] sticky overflow-y-auto bg-gray-70 sidebar-scrollbar md:block hidden">
+      <div className="p-4">
         <ul className="flex flex-col gap-2 font-medium text-gray-80">
           {menuItems.map(({ name, Icon, to }, idx) => (
             <Link
@@ -55,18 +54,18 @@ export default function Sidebar() {
               className="flex items-center duration-200 px-3 py-2.5 rounded gap-4 hover:bg-lightBlue-10 hover:text-blue-20"
             >
               <Icon />
-              <span className="sidebarListItemText">{name}</span>
+              <span>{name}</span>
             </Link>
           ))}
         </ul>
-        <div className="IconList">
+        <div className="flex mt-5 gap-1 mb-2 items-center justify-center">
           {linkItems.map(({ Icon, to }, idx) => (
             <a target="_blank" rel="noreferrer" key={idx} href={to}>
-              <Icon className="IconsList" />
+              <Icon className="text-3xl text-gray-90 hover:text-[#353434]" />
             </a>
           ))}
         </div>
-        <hr className="sidebarHr" />
+        <hr className="py-5" />
       </div>
     </div>
   );
