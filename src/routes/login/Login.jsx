@@ -89,6 +89,12 @@ export default function Login() {
             })}
           />
         </div>
+        <Link
+          className="text-[#3a8fde] text-sm text-right block"
+          to="/forgot-password"
+        >
+          Forgot Password?
+        </Link>
         <div className="mt-5">
           <Button
             variant="contained"
