@@ -5,8 +5,7 @@ import Loader from "../../common/components/loader";
 import Conversations from "./Conversations";
 import { connect } from "react-redux";
 import { subscribe, unsubscribe } from "../../services/events";
-
-document.title = "Social Media | Chat";
+import { APP_NAME } from "../../constants/constants";
 
 function Chatapp({ socket, user }) {
   const [conversations, setConversations] = useState([]);
@@ -15,6 +14,10 @@ function Chatapp({ socket, user }) {
   const [incomingMessage, setIncomingMessage] = useState({});
 
   const convRef = useRef(null);
+
+  useEffect(() => {
+    document.title = `${APP_NAME} | Chat`;
+  }, []);
 
   const addSortConversations = ({ conversationId, text, sender }) => {
     setConversations((prev) => {

@@ -6,10 +6,11 @@ import Rightbox from "../../components/rightbox/Rightbox";
 import Nonuser from "../../components/nonuser/Nonuser";
 import Skeleton from "../../components/Skeleton/Skeleton";
 import { fetchPosts } from "../../redux/actions";
+import { APP_NAME } from "../../constants/constants";
 
 function Home({ posts, fetchPosts, user }) {
   useEffect(() => {
-    document.title = "Social Media";
+    document.title = APP_NAME;
     fetchPosts();
   }, [fetchPosts]);
 

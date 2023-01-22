@@ -1,15 +1,12 @@
 import { useState, useEffect } from "react";
 import { Button, TextField } from "@material-ui/core";
-import { Link, useHistory } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 import { Close } from "@material-ui/icons";
 import { useForm } from "react-hook-form";
-import { actionTypes } from "../../constants/constants";
+import toast from "react-hot-toast";
 import BASE_URL from "../../api/baseUrl";
 
-const { UPDATE_USER } = actionTypes;
-
-export default function Login() {
+export default function ForgotPassword() {
   const {
     register,
     handleSubmit,
@@ -18,25 +15,27 @@ export default function Login() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const history = useHistory();
-
-  const dispatch = useDispatch();
-
   useEffect(() => {
-    document.title = "Login";
+    document.title = "Forgot Password";
   }, []);
 
-  const onSubmit = async ({ email, password }) => {
+  const onSubmit = async ({ email }) => {
     setIsLoading(true);
+    setError("");
     try {
-      const { data } = await BASE_URL.post("/auth/login", {
+      const { data } = await BASE_URL.post("/reset", {
         email: email.toLowerCase(),
-        password,
       });
-      dispatch({ type: UPDATE_USER, payload: data?.response });
-      history.push("/");
+      if (data?.message)
+        toast.success(data.message, {
+          position: "top-right",
+        });
     } catch (error) {
-      setError(error?.response?.data?.message || "Something went wrong!");
+      setError(
+        error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          "Something went wrong, Please try again"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -45,14 +44,18 @@ export default function Login() {
   return (
     <div className="mt-16">
       <form
-        className="rounded-lg mx-auto px-2.5 pt-2.5 pb-4 border border-darkGray-30 max-w-112.5"
+        className="rounded-lg mx-auto px-3 pt-2.5 pb-4 border border-darkGray-30 max-w-112.5"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="flex justify-between px-2.5 my-2">
-          <h2 className="text-xl text-center font-semibold">Login</h2>
+        <div className="flex justify-between my-2">
+          <h2 className="text-xl text-center font-semibold">Forgot Password</h2>
           <Link to="/">
             <Close />
           </Link>
+        </div>
+        <div className="mt-4 text-gray-80 text-sm">
+          Enter your email address in the form below and we will send your the
+          recovery link to reset your password
         </div>
         <div className="mt-4">
           <TextField
@@ -64,37 +67,15 @@ export default function Login() {
             variant="outlined"
             {...register("email", {
               required: "email is required",
-              // pattern: {
-              //   value:
-              //     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-              //   message: "Please enter a valid email.",
-              // },
+              pattern: {
+                value:
+                  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                message: "Please enter a valid email.",
+              },
             })}
           />
         </div>
-        <div className="mt-4">
-          <TextField
-            type="password"
-            fullWidth
-            label="Password"
-            error={!!errors.password}
-            helperText={errors?.password?.message}
-            variant="outlined"
-            {...register("password", {
-              // minLength: {
-              //   value: 8,
-              //   message: "Password must be at least 8 characters.",
-              // },
-              required: "Password is required.",
-            })}
-          />
-        </div>
-        <Link
-          className="text-[#3a8fde] text-sm text-right block"
-          to="/forgot-password"
-        >
-          Forgot Password?
-        </Link>
+
         <div className="mt-5">
           <Button
             variant="contained"
@@ -109,7 +90,7 @@ export default function Login() {
                 <div className="circle-loader"></div>
               </div>
             ) : (
-              "Login"
+              "Send Email"
             )}
           </Button>
         </div>
@@ -118,7 +99,7 @@ export default function Login() {
             {error}
           </div>
         )}
-        <div className="text-center text-sm mt-1">
+        <div className="text-center text-sm mt-2">
           Don't have account
           <Link
             to="/signup"

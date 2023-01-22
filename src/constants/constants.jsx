@@ -1,3 +1,4 @@
+export const APP_NAME = "Mern Media";
 export const DEFAULT_AVATAR = "/images/avatar.png";
 export const PROFILE_AVATAR = "/images/profile-avatar.png";
 

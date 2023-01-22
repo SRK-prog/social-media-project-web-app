@@ -9,6 +9,7 @@ import MobSearchDropdown from "./mobSearchDropdown";
 import ClickOutside from "../../common/components/clickOutside";
 import MenusDropdown from "./menusDropdown";
 import { actionTypes } from "../../constants/constants";
+import { APP_NAME } from "../../constants/constants";
 
 const { REMOVE_USER } = actionTypes;
 
@@ -52,8 +53,7 @@ export default function Navbar() {
               to="/"
               className="font-bold md:text-xl text-lg px-2.5 h-11 gap-2 text-white cursor-pointer bg-black-0 rounded flex items-center"
             >
-              <div>Social</div>
-              <div>Media</div>
+              {APP_NAME}
             </Link>
             <ClickOutside isOpen={showSidebar} onClickOutside={setShowSidebar}>
               <Menubar showSidebar={showSidebar} onClose={setShowSidebar} />

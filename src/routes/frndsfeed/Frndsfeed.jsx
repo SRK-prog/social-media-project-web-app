@@ -6,10 +6,11 @@ import Rightbox from "../../components/rightbox/Rightbox";
 import Skeleton from "../../components/Skeleton/Skeleton";
 import { fetchFriendsPosts } from "../../redux/actions";
 import Navlinks from "../../components/cards/Navlinks";
+import { APP_NAME } from "../../constants/constants";
 
 function Frndsfeed({ posts, fetchFriendsPosts, user }) {
   useEffect(() => {
-    document.title = "Social Media | Post";
+    document.title = `${APP_NAME} | Feeds`;
     fetchFriendsPosts(user.accessToken);
     // eslint-disable-next-line
   }, [user.userId]);
@@ -17,7 +18,7 @@ function Frndsfeed({ posts, fetchFriendsPosts, user }) {
   const RenderFrndsPosts = () => {
     if (!posts.length) {
       return (
-        <div className="flex flex-col flex-[6.5] md:px-0 px-2 mt-1.25">
+        <div className="flex flex-col flex-[6.5] md:px-0 px-2 mt-1.25 min-h-screen">
           <Navlinks />
           {[1, 2, 3, 4, 5].map((i) => (
             <Skeleton key={i} />

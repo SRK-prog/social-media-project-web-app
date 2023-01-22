@@ -7,6 +7,7 @@ import { PROFILE_AVATAR } from "../../constants/constants";
 import BASE_URL from "../../api/baseUrl";
 import Cards from "../../components/cards/Cards";
 import Loader from "../../common/components/loader";
+import FriendsList from "../../components/friendsList";
 
 export default function Profile() {
   const user = useSelector((state) => state.user);
@@ -16,6 +17,7 @@ export default function Profile() {
   const [isfollowed, setIsfollowed] = useState(false);
   const [posts, setUserposts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [friendType, setFriendType] = useState(null);
 
   const location = useLocation();
   const profileId = location.pathname.split("/")[2];
@@ -30,6 +32,10 @@ export default function Profile() {
       ? `Profile | ${profile?.username}`
       : "Profile";
   }, [profile?.username]);
+
+  const onFollowClick = (type) => {
+    setFriendType((p) => (p === type ? null : type));
+  };
 
   // Follow Feature
   const followHandler = () => {
@@ -48,6 +54,7 @@ export default function Profile() {
 
   useEffect(() => {
     (async () => {
+      setFriendType("");
       setIsLoading(true);
       try {
         const select =
@@ -84,7 +91,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="flex max-w-360 mx-auto">
+    <div className="flex max-w-360 mx-auto relative">
       <div className="flex-[2] md:block hidden">
         <Sidebar />
       </div>
@@ -94,7 +101,11 @@ export default function Profile() {
         </div>
       )}
       {!isLoading && (
-        <div className="relative flex-[6.5] bg-gray-130">
+        <div
+          className={`relative bg-gray-130 ${
+            !!friendType ? "flex-[4.5]" : "flex-[6.5]"
+          }`}
+        >
           <div className="h-24 bg-gray-140"></div>
           <div>
             <img
@@ -115,16 +126,27 @@ export default function Profile() {
                     <div className="CountsTitles">Posts</div>
                     <div className="CountsOf">{posts.length}</div>
                   </span>
-                  <span className="Follows">
+                  <button
+                    onClick={() => {
+                      if (follow) onFollowClick("FOLLOWERS");
+                    }}
+                    className="Follows"
+                  >
                     <div className="CountsTitles">Followers</div>
                     <div className="CountsOf">{follow}</div>
-                  </span>
-                  <span className="Follows">
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (profile?.followings?.length)
+                        onFollowClick("FOLLOWINGS");
+                    }}
+                    className="Follows"
+                  >
                     <div className="CountsTitles">Following</div>
                     <div className="CountsOf">
                       {profile?.followings?.length || 0}
                     </div>
-                  </span>
+                  </button>
                 </span>
               </div>
               <div className="UserInfo">
@@ -194,6 +216,17 @@ export default function Profile() {
           </div>
         </div>
       )}
+      <div
+        className={`md:flex-[2]  bg-gray-130 md:static w-full min-h-full absolute z-50 ${
+          !friendType && "hidden"
+        }`}
+      >
+        <FriendsList
+          onClose={setFriendType}
+          type={friendType}
+          userId={profile?._id}
+        />
+      </div>
     </div>
   );
 }
