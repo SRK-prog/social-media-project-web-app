@@ -10,8 +10,7 @@ import {
   Send,
 } from "@material-ui/icons";
 import moment from "moment";
-import { useLocation } from "react-router";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Comments from "../../components/comments/Comments";
@@ -25,10 +24,10 @@ export default function SinglePost() {
   const [like, setLike] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [title, setTitle] = useState("");
-  const [description, setDesc] = useState("");
+  const [description, setDescription] = useState("");
   const [updateMode, setUpdateMode] = useState(false);
   const [comments, setComments] = useState([]);
-  const [commentsbtn, setCommentsbtn] = useState(true);
+  const [showComments, setShowComment] = useState(true);
   const [newcomment, setNewcomment] = useState("");
 
   const location = useLocation();
@@ -67,7 +66,7 @@ export default function SinglePost() {
       });
       setPost(response);
       setTitle(response.title);
-      setDesc(response.description);
+      setDescription(response.description);
       setLike(response.likes.length);
       setIsLiked(response.likes.includes(user.userId));
     };
@@ -126,13 +125,13 @@ export default function SinglePost() {
         <div className="mt-2 rounded-lg bg-white border border-gray-100 py-2.5">
           <div className="flex justify-between px-2.5 items-center">
             <Link
-              to={`/profile/${post?.user?.username}`}
+              to={`/profile/${post?.user?._id}`}
               className="flex gap-2.5 pb-2"
             >
               <div>
                 <img
                   className="h-10 w-10 object-cover rounded-full"
-                  src={post.profilepicture || DEFAULT_AVATAR}
+                  src={post?.user?.profilepicture || DEFAULT_AVATAR}
                   alt=""
                 />
               </div>
@@ -181,7 +180,7 @@ export default function SinglePost() {
                       fullWidth
                       multiline
                       minRows={4}
-                      onChange={(e) => setDesc(e.target.value)}
+                      onChange={(e) => setDescription(e.target.value)}
                     />
                   </div>
                 </div>
@@ -233,7 +232,7 @@ export default function SinglePost() {
                   <span>{like}</span>
                 </button>
                 <button
-                  onClick={() => setCommentsbtn((p) => !p)}
+                  onClick={() => setShowComment((p) => !p)}
                   className="gap-1.5 flex items-center"
                 >
                   <ModeCommentOutlined />
@@ -248,7 +247,7 @@ export default function SinglePost() {
 
           <div
             className={`px-8 border-t border-gray-100 my-5 ${
-              !commentsbtn && "hidden"
+              !showComments && "hidden"
             }`}
           >
             <h2 className="my-8 text-2xl font-bold">Comments</h2>

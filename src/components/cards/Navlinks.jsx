@@ -10,14 +10,14 @@ export default function Navlinks() {
         to="/"
         activeClassName="font-black"
       >
-        Feed
+        Posts
       </NavLink>
       <NavLink
         className="ml-2 text-black-0 py-1 px2"
         to="/feeds"
         activeClassName="font-black"
       >
-        Post
+        Feeds
       </NavLink>
     </div>
   );

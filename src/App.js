@@ -27,6 +27,8 @@ const Contact = lazy(() => import("./routes/contact/Contact"));
 const Settings = lazy(() => import("./routes/settings/Settings"));
 const Chatapp = lazy(() => import("./routes/chatapp/Chatapp"));
 const About = lazy(() => import("./routes/about/About"));
+const ForgotPassword = lazy(() => import("./routes/forgotPassword"));
+const ResetPassword = lazy(() => import("./routes/resetPassword"));
 
 const { UPDATE_SOCKET } = actionTypes;
 
@@ -110,6 +112,8 @@ function App({ dispatch, socket, user }) {
           <Route exact path="/" component={Home} />
           <Route path="/login" component={Login} />
           <Route path="/signup" component={Register} />
+          <Route path="/forgot-password" component={ForgotPassword} />
+          <Route path="/reset-password" component={ResetPassword} />
           <Route path="/error404" component={Error404} />
           <Route path="/contact" component={Contact} />
           <Route path="/about" component={About} />

@@ -4,12 +4,13 @@ import moment from "moment";
 import {
   FavoriteBorderOutlined,
   ModeCommentOutlined,
-  ShareOutlined,
   Favorite,
+  FileCopyOutlined,
 } from "@material-ui/icons";
 import BASE_URL from "../../api/baseUrl";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 import useSingleAndDoubleClick from "../../hooks/useSingleAndDoubleClick";
+import toast from "react-hot-toast";
 
 const CardItem = ({ post, user }) => {
   const [like, setLike] = useState(post.likes.length);
@@ -36,6 +37,13 @@ const CardItem = ({ post, user }) => {
     () => history.push(`/postdetails/${post._id}`),
     likeHandler
   );
+
+  const onCopy = () => {
+    navigator.clipboard.writeText(`${window.origin}/postdetails/${post._id}`);
+    toast.success("Copied!", {
+      position: "top-right",
+    });
+  };
 
   return (
     <div className="mt-2 rounded-lg bg-white border border-gray-100 py-2.5">
@@ -92,9 +100,9 @@ const CardItem = ({ post, user }) => {
             <ModeCommentOutlined />
           </Link>
         </div>
-        <div className="">
-          <ShareOutlined />
-        </div>
+        <button onClick={onCopy} className="">
+          <FileCopyOutlined />
+        </button>
       </div>
     </div>
   );
