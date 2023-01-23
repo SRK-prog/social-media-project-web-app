@@ -1,6 +1,6 @@
 import { memo, useState, useEffect } from "react";
 import moment from "moment";
-import { DoneAll } from "@material-ui/icons";
+import { Done } from "@material-ui/icons";
 
 const formatDate = (date) => {
   const today = new Date();
@@ -28,10 +28,12 @@ function Message({ message, own, showSent }) {
           }`}
         >
           <div className="text-xs">{formatDate(message?.createdAt)}</div>
-          <div className="md:text-base text-sm break-all">{message?.text}</div>
+          <div className="md:text-base text-sm break-all mr-3.5">
+            {message?.text}
+          </div>
           {showSent && isSent && (
             <div className="text-[14px] absolute text-white bottom-0.5 right-2">
-              <DoneAll fontSize="inherit" />
+              <Done fontSize="inherit" />
             </div>
           )}
         </div>
