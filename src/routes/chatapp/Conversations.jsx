@@ -214,11 +214,11 @@ const Conversations = (props) => {
         }`;
   };
 
-  const showSent = (msg, idx) => {
+  const showSent = (msg) => {
     return (
       msg?.sender === user?.userId &&
       !!msg?.promise &&
-      messages[idx]?._id === msg?._id
+      messages?.[0]?._id === msg?._id
     );
   };
 
@@ -254,10 +254,10 @@ const Conversations = (props) => {
       )}
       <div className="h-full overflow-y-auto px-2.5 my-4 custom-scrollbar flex flex-col-reverse">
         <div ref={scrollRef}></div>
-        {messages.map((m, idx) => (
+        {messages.map((m) => (
           <div className="px-4" key={m._id}>
             <Message
-              showSent={showSent(m, idx)}
+              showSent={showSent(m)}
               message={m}
               own={m.sender === user.userId}
             />
