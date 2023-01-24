@@ -19,7 +19,7 @@ const Home = lazy(() => import("./routes/home/Home"));
 const SinglePost = lazy(() => import("./routes/singlePost/SinglePost"));
 const Register = lazy(() => import("./routes/register/Register"));
 const Login = lazy(() => import("./routes/login/Login"));
-const Write = lazy(() => import("./routes/write/Write"));
+const Write = lazy(() => import("./routes/createPost"));
 const Profile = lazy(() => import("./routes/profile/Profile"));
 const Frndsfeed = lazy(() => import("./routes/frndsfeed/Frndsfeed"));
 const Error404 = lazy(() => import("./routes/errors/Error404"));
