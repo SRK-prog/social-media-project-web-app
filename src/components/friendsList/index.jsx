@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import baseUrl from "../../api/baseUrl";
+import { ArrowBack } from "@material-ui/icons";
+import { baseUrl } from "../../api/baseUrls";
 import Loader from "../../common/components/loader";
 import ListItem from "./listItem";
-import { ArrowBack } from "@material-ui/icons";
 
 const FriendsList = ({ type, userId, onClose }) => {
   const [isLoading, setIsLoading] = useState(true);

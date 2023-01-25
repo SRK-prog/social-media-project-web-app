@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { DEFAULT_AVATAR } from "../../constants/constants";
-import BASE_URL from "../../api/baseUrl";
+import { baseUrl } from "../../api/baseUrls";
 
 const formatText = (conv, curtUserId) => {
   if (!conv?.text) return "";
@@ -15,7 +15,7 @@ function Conversation({ conversation, currentUser, isActive, onSelect }) {
     const friendId = conversation.members.find((m) => m !== currentUser.userId);
     (async () => {
       try {
-        const { data } = await BASE_URL.get("/users", {
+        const { data } = await baseUrl.get("/users", {
           params: { userId: friendId },
         });
         if (data?.response) setUser(data.response);

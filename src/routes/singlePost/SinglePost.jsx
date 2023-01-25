@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory, useLocation } from "react-router-dom";
 import { TextField, Button } from "@material-ui/core";
 import {
   FavoriteBorderOutlined,
@@ -10,11 +10,10 @@ import {
   Send,
 } from "@material-ui/icons";
 import moment from "moment";
-import { useHistory, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Comments from "../../components/comments/Comments";
-import BASE_URL from "../../api/baseUrl";
+import { baseUrl } from "../../api/baseUrls";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 
 export default function SinglePost() {
@@ -38,7 +37,7 @@ export default function SinglePost() {
     setLike((prevLikes) => (isLiked ? prevLikes - 1 : prevLikes + 1));
     setIsLiked((p) => !p);
     try {
-      BASE_URL.put(
+      baseUrl.put(
         "/posts/like",
         { postId: post?._id },
         { headers: { Authorization: `Bearer ${user.accessToken}` } }
@@ -48,7 +47,7 @@ export default function SinglePost() {
 
   const fetchComments = async () => {
     try {
-      const { data } = await BASE_URL.get("/comments", {
+      const { data } = await baseUrl.get("/comments", {
         params: { postId: path },
       });
       setComments(data);
@@ -61,7 +60,7 @@ export default function SinglePost() {
     const getPost = async () => {
       const {
         data: { response },
-      } = await BASE_URL.get("/posts", {
+      } = await baseUrl.get("/posts", {
         params: { postId: path },
       });
       setPost(response);
@@ -77,7 +76,7 @@ export default function SinglePost() {
 
   const handleDelete = async () => {
     try {
-      await BASE_URL.delete(`/posts`, {
+      await baseUrl.delete(`/posts`, {
         data: { postId: post?._id },
         headers: { Authorization: `Bearer ${user.accessToken}` },
       });
@@ -87,7 +86,7 @@ export default function SinglePost() {
 
   const handleUpdate = async () => {
     try {
-      await BASE_URL.put(
+      await baseUrl.put(
         `/posts`,
         { postId: post?._id, title, description },
         { headers: { Authorization: `Bearer ${user.accessToken}` } }
@@ -112,7 +111,7 @@ export default function SinglePost() {
     ]);
     setNewcomment("");
     try {
-      BASE_URL.post("/comments", postComment, {
+      baseUrl.post("/comments", postComment, {
         headers: { Authorization: `Bearer ${user.accessToken}` },
       });
     } catch (err) {}

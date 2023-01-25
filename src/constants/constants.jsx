@@ -6,6 +6,7 @@ export const actionTypes = {
   UPDATE_SOCKET: "UPDATE_SOCKET",
   UPDATE_USER: "UPDATE_USER",
   REMOVE_USER: "REMOVE_USER",
+  FETCH_POSTS: "FETCH_POSTS",
 };
 
 export const keyTypes = {

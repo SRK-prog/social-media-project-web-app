@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { Button, TextField } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { Close } from "@material-ui/icons";
+import { Close, Visibility, VisibilityOff } from "@material-ui/icons";
 import { useForm } from "react-hook-form";
 import { actionTypes } from "../../constants/constants";
-import BASE_URL from "../../api/baseUrl";
+import { baseUrl } from "../../api/baseUrls";
 
 const { UPDATE_USER } = actionTypes;
 
@@ -17,6 +17,7 @@ export default function Login() {
   } = useForm();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordMask, setPasswordMask] = useState(true);
 
   const history = useHistory();
 
@@ -29,7 +30,7 @@ export default function Login() {
   const onSubmit = async ({ email, password }) => {
     setIsLoading(true);
     try {
-      const { data } = await BASE_URL.post("/auth/login", {
+      const { data } = await baseUrl.post("/auth/login", {
         email: email.toLowerCase(),
         password,
       });
@@ -43,7 +44,7 @@ export default function Login() {
   };
 
   return (
-    <div className="mt-16">
+    <div className="mt-16 mx-3">
       <form
         className="rounded-lg mx-auto px-2.5 pt-2.5 pb-4 border border-darkGray-30 max-w-112.5"
         onSubmit={handleSubmit(onSubmit)}
@@ -64,27 +65,33 @@ export default function Login() {
             variant="outlined"
             {...register("email", {
               required: "email is required",
-              // pattern: {
-              //   value:
-              //     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-              //   message: "Please enter a valid email.",
-              // },
+              pattern: {
+                value:
+                  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                message: "Please enter a valid email.",
+              },
             })}
           />
         </div>
-        <div className="mt-4">
+        <div className="mt-4 relative">
+          <div
+            onClick={() => setPasswordMask((p) => !p)}
+            className="absolute top-2 cursor-pointer right-2 z-10 p-2 text-darkGray-10"
+          >
+            {passwordMask ? <Visibility /> : <VisibilityOff />}
+          </div>
           <TextField
-            type="password"
+            type={passwordMask ? "password" : "text"}
             fullWidth
             label="Password"
             error={!!errors.password}
             helperText={errors?.password?.message}
             variant="outlined"
             {...register("password", {
-              // minLength: {
-              //   value: 8,
-              //   message: "Password must be at least 8 characters.",
-              // },
+              minLength: {
+                value: 8,
+                message: "Password must be at least 8 characters.",
+              },
               required: "Password is required.",
             })}
           />

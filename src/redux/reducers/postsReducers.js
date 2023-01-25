@@ -1,4 +1,6 @@
-import { FETCH_POSTS } from "../types";
+import { actionTypes } from "../../constants/constants";
+
+const { FETCH_POSTS } = actionTypes;
 
 export default function fetchingPosts(state = [], action) {
   switch (action.type) {

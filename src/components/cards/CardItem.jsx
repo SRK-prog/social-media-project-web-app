@@ -7,10 +7,10 @@ import {
   Favorite,
   FileCopyOutlined,
 } from "@material-ui/icons";
-import BASE_URL from "../../api/baseUrl";
+import toast from "react-hot-toast";
+import { baseUrl } from "../../api/baseUrls";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 import useSingleAndDoubleClick from "../../hooks/useSingleAndDoubleClick";
-import toast from "react-hot-toast";
 
 const CardItem = ({ post, user }) => {
   const [like, setLike] = useState(post.likes.length);
@@ -23,7 +23,7 @@ const CardItem = ({ post, user }) => {
 
   const likeHandler = () => {
     try {
-      BASE_URL.put(
+      baseUrl.put(
         "/posts/like",
         { postId: post._id },
         { headers: { Authorization: `Bearer ${user.accessToken}` } }

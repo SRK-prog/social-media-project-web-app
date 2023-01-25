@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from "react";
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 import Conversation from "../../components/conversations/Conversation";
-import BASE_URL from "../../api/baseUrl";
+import { chatBaseUrl } from "../../api/baseUrls";
 import Loader from "../../common/components/loader";
 import Conversations from "./Conversations";
-import { connect } from "react-redux";
 import { subscribe, unsubscribe } from "../../services/events";
 import { APP_NAME } from "../../constants/constants";
 
@@ -49,7 +50,7 @@ function Chatapp({ socket, user }) {
     (async () => {
       setIsLoading(true);
       try {
-        const { data } = await BASE_URL.get("/conversations/" + user.userId);
+        const { data } = await chatBaseUrl.get("/conversations/" + user.userId);
         setConversations(data);
       } catch (err) {
         console.log(err);
@@ -112,8 +113,18 @@ function Chatapp({ socket, user }) {
 
   return (
     <div className="flex flex-col justify-center mt-32">
-      <div className="m-auto font-semibold text-gray-110 mb-2">No Friends</div>
-      <div className="mx-auto">Follow a Friend To Start Conversation</div>
+      <div className="m-auto font-bold text-darkGray-10 text-2xl mb-2">
+        No Friends
+      </div>
+      <div className="mx-auto text-[#222222] font-medium">
+        Follow a Friend To Start Conversation
+      </div>
+      <Link
+        to="/"
+        className="text-[#3a8fde] text-lg block underline underline-offset-2 mx-auto mt-1"
+      >
+        Go Back
+      </Link>
     </div>
   );
 }

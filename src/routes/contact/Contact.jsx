@@ -1,17 +1,19 @@
+import { useState, useEffect } from "react";
 import { TextField, Button } from "@material-ui/core";
-import { useState } from "react";
 import { Close } from "@material-ui/icons";
 import { Link, useHistory } from "react-router-dom";
-import BASE_URL from "../../api/baseUrl";
+import { baseUrl } from "../../api/baseUrls";
 
-document.title = "Contact";
-
-const initialValue = { sendername: "", senderemail: "", message: "" };
+const initialValue = { senderName: "", senderEmail: "", message: "" };
 
 export default function Contact() {
   const [values, setValues] = useState(initialValue);
 
   const history = useHistory();
+
+  useEffect(() => {
+    document.title = "Contact";
+  }, []);
 
   const onChange = ({ target }) => {
     const { name, value } = target;
@@ -21,7 +23,7 @@ export default function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await BASE_URL.post("/mail", values);
+      await baseUrl.post("/mail", values);
       history.push("/");
     } catch (err) {
       console.log(err);
@@ -44,7 +46,7 @@ export default function Contact() {
           <TextField
             type="text"
             label="Name"
-            name="sendername"
+            name="senderName"
             fullWidth
             variant="outlined"
             onChange={onChange}
@@ -54,7 +56,7 @@ export default function Contact() {
           <TextField
             type="email"
             fullWidth
-            name="senderemail"
+            name="senderEmail"
             label="Email"
             variant="outlined"
             onChange={onChange}

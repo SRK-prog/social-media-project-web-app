@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { TextField, Button } from "@material-ui/core";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
-import { Close } from "@material-ui/icons";
-import BASE_URL from "../../api/baseUrl";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
+import { Close, Visibility, VisibilityOff } from "@material-ui/icons";
+import { baseUrl } from "../../api/baseUrls";
 
 export default function Register() {
   const {
@@ -15,6 +14,10 @@ export default function Register() {
   } = useForm();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordsMask, setPasswordsMask] = useState({
+    pwd: true,
+    confirmPwd: true,
+  });
 
   const history = useHistory();
 
@@ -26,7 +29,7 @@ export default function Register() {
     setError(false);
     setIsLoading(true);
     try {
-      await BASE_URL.post("/auth/signup", {
+      await baseUrl.post("/auth/signup", {
         ...data,
         email: data.email.toLowerCase(),
       });
@@ -41,7 +44,7 @@ export default function Register() {
   };
 
   return (
-    <div className="mt-16">
+    <div className="mt-16 mx-3">
       <form
         className="rounded-lg mx-auto px-2.5 pt-2.5 pb-4 border border-darkGray-30 max-w-112.5"
         onSubmit={handleSubmit(onSubmit)}
@@ -81,9 +84,15 @@ export default function Register() {
             })}
           />
         </div>
-        <div className="mt-4">
+        <div className="mt-4 relative">
+          <div
+            onClick={() => setPasswordsMask((p) => ({ ...p, pwd: !p.pwd }))}
+            className="absolute top-2 cursor-pointer right-2 z-10 p-2 text-darkGray-10"
+          >
+            {passwordsMask.pwd ? <Visibility /> : <VisibilityOff />}
+          </div>
           <TextField
-            type="password"
+            type={passwordsMask.pwd ? "password" : "text"}
             fullWidth
             label="Password"
             variant="outlined"
@@ -91,22 +100,30 @@ export default function Register() {
             helperText={errors?.password?.message}
             {...register("password", {
               required: "Password is required.",
-              // pattern: {
-              //   value:
-              //     /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{7,}$/,
-              //   message:
-              //     "Password must include letters, numbers and special characters.",
-              // },
-              // minLength: {
-              //   value: 8,
-              //   message: "Password must be at least 8 characters.",
-              // },
+              pattern: {
+                value:
+                  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{7,}$/,
+                message:
+                  "Password must include letters, numbers and special characters.",
+              },
+              minLength: {
+                value: 8,
+                message: "Password must be at least 8 characters.",
+              },
             })}
           />
         </div>
-        <div className="mt-4">
+        <div className="mt-4 relative">
+          <div
+            onClick={() =>
+              setPasswordsMask((p) => ({ ...p, confirmPwd: !p.confirmPwd }))
+            }
+            className="absolute top-2 cursor-pointer right-2 z-10 p-2 text-darkGray-10"
+          >
+            {passwordsMask.confirmPwd ? <Visibility /> : <VisibilityOff />}
+          </div>
           <TextField
-            type="password"
+            type={passwordsMask.confirmPwd ? "password" : "text"}
             fullWidth
             label="confirm password"
             variant="outlined"

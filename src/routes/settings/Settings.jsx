@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { Button, TextField } from "@material-ui/core";
 import { useDispatch, useSelector } from "react-redux";
-import Sidebar from "../../components/sidebar/Sidebar";
 import axios from "axios";
+import Sidebar from "../../components/sidebar/Sidebar";
 import { DEFAULT_AVATAR } from "../../constants/constants";
-import BASE_URL from "../../api/baseUrl";
+import { baseUrl } from "../../api/baseUrls";
 import { actionTypes } from "../../constants/constants";
 
 document.title = "Settings";
@@ -35,7 +35,7 @@ export default function Settings() {
       const select =
         "username email profilepicture description city createdAt lastSeen";
       try {
-        const { data } = await BASE_URL.get(`/users`, {
+        const { data } = await baseUrl.get(`/users`, {
           params: { userId: user.userId, select },
         });
         if (data?.response) setSettingsState(data?.response);
@@ -47,7 +47,7 @@ export default function Settings() {
     e.preventDefault();
     const updatedUser = { userId: user.userId, ...settingsState };
     try {
-      const { data } = await BASE_URL.put("/users", updatedUser, {
+      const { data } = await baseUrl.put("/users", updatedUser, {
         headers: { Authorization: `Bearer ${user.accessToken}` },
       });
       if (data?.response)

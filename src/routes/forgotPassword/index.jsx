@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Close } from "@material-ui/icons";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import BASE_URL from "../../api/baseUrl";
+import { baseUrl } from "../../api/baseUrls";
 
 export default function ForgotPassword() {
   const {
@@ -23,7 +23,7 @@ export default function ForgotPassword() {
     setIsLoading(true);
     setError("");
     try {
-      const { data } = await BASE_URL.post("/reset", {
+      const { data } = await baseUrl.post("/reset", {
         email: email.toLowerCase(),
       });
       if (data?.message)
@@ -42,7 +42,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="mt-16">
+    <div className="mt-16 mx-3">
       <form
         className="rounded-lg mx-auto px-3 pt-2.5 pb-4 border border-darkGray-30 max-w-112.5"
         onSubmit={handleSubmit(onSubmit)}

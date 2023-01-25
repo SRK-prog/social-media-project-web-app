@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 import axios from "axios";
 import { TextField } from "@material-ui/core";
 import ImageIcon from "@material-ui/icons/Image";
 import DoneIcon from "@material-ui/icons/Done";
 import Sidebar from "../../components/sidebar/Sidebar";
-import BASE_URL from "../../api/baseUrl";
-import { useSelector } from "react-redux";
+import { baseUrl } from "../../api/baseUrls";
 
 export default function Write() {
   const user = useSelector((state) => state.user);
@@ -25,7 +25,7 @@ export default function Write() {
     e.preventDefault();
     const newPost = { photo: imageurl, title, description };
     try {
-      await BASE_URL.post("/posts", newPost, {
+      await baseUrl.post("/posts", newPost, {
         headers: { Authorization: `Bearer ${user.accessToken}` },
       });
       history.push("/");
