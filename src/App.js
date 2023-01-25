@@ -7,11 +7,11 @@ import {
 } from "react-router-dom";
 import { connect } from "react-redux";
 import { io } from "socket.io-client";
+import { Toaster } from "react-hot-toast";
 import Loader from "./common/components/loader";
 import Navbar from "./components/navbar/Navbar";
 import Utils from "./utils";
 import { actionTypes } from "./constants/constants";
-import { Toaster } from "react-hot-toast";
 import { publish } from "./services/events";
 import notifyToast from "./common/components/notifyToast";
 
@@ -81,7 +81,7 @@ function App({ dispatch, socket, user }) {
 
   const connect = async () => {
     if (socket.connected) return;
-    const socketIo = io(process.env.REACT_APP_CHAT_SOCKET_URL, {
+    const socketIo = io(process.env.REACT_APP_CHAT_SERVICE_URL + "/chat", {
       query: { id: user?.userId },
     });
     socketIo.once("connect", () => {

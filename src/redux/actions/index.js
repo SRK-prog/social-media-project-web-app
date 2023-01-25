@@ -1,16 +1,11 @@
-import { FETCH_FRIENDSPOSTS, FETCH_POSTS } from "../types";
-import BASE_URL from "../../api/baseUrl";
+import { actionTypes } from "../../constants/constants";
+import { baseUrl } from "../../api/baseUrls";
+
+const { FETCH_POSTS } = actionTypes;
 
 export const fetchPosts = () => async (dispatch) => {
   const {
     data: { response },
-  } = await BASE_URL.get("/posts/get-all");
+  } = await baseUrl.get("/posts/get-all");
   dispatch({ type: FETCH_POSTS, payload: response });
-};
-
-export const fetchFriendsPosts = (token) => async (dispatch) => {
-  const { data: { response }, } = await BASE_URL.get("/posts/timeline/", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  dispatch({ type: FETCH_FRIENDSPOSTS, payload: response });
 };

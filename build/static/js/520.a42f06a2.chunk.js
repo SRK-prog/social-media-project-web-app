@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkclient=self.webpackChunkclient||[]).push([[520],{9520:function(e,t,n){n.r(t),n.d(t,{default:function(){return c}});var u=n(184);function c(){return(0,u.jsx)("div",{className:"",children:"About Project Page"})}document.title="Mern - about"}}]);
-//# sourceMappingURL=520.a42f06a2.chunk.js.map

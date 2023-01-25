@@ -1,6 +1,6 @@
 import React from "react";
-import { DEFAULT_AVATAR } from "../../constants/constants";
 import { useHistory } from "react-router-dom";
+import { DEFAULT_AVATAR } from "../../constants/constants";
 
 const ListItem = ({ data }) => {
   const history = useHistory();

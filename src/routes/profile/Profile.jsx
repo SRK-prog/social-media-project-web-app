@@ -4,7 +4,7 @@ import { useHistory, useLocation, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Sidebar from "../../components/sidebar/Sidebar";
 import { PROFILE_AVATAR } from "../../constants/constants";
-import BASE_URL from "../../api/baseUrl";
+import { baseUrl } from "../../api/baseUrls";
 import Cards from "../../components/cards/Cards";
 import Loader from "../../common/components/loader";
 import FriendsList from "../../components/friendsList";
@@ -40,7 +40,7 @@ export default function Profile() {
   // Follow Feature
   const followHandler = () => {
     try {
-      BASE_URL.put(
+      baseUrl.put(
         "/users/profile/follow",
         { profileId: profile?._id },
         { headers: { Authorization: `Bearer ${user.accessToken}` } }
@@ -48,7 +48,7 @@ export default function Profile() {
     } catch (err) {
       console.log("follow feature error: ", err);
     }
-    setfollow(isfollowed ? follow - 1 : follow + 1);
+    setfollow((prev) => (isfollowed ? prev - 1 : prev + 1));
     setIsfollowed((p) => !p);
   };
 
@@ -60,14 +60,16 @@ export default function Profile() {
         const select =
           "username email profilepicture followers followings createdAt lastSeen";
         const [profileUser, profilePosts] = await Promise.all([
-          BASE_URL.get(`/users`, {
+          baseUrl.get(`/users`, {
             params: { userId: profileId, select },
           }),
-          BASE_URL.get("/posts/profile", {
-            params: { userId: profileId },
-          }).catch((er) => {
-            if (er.response.status === 404) setUserposts([]);
-          }),
+          baseUrl
+            .get("/posts/profile", {
+              params: { userId: profileId },
+            })
+            .catch((er) => {
+              if (er.response.status === 404) setUserposts([]);
+            }),
         ]);
 
         if (profilePosts) setUserposts(profilePosts.data?.response || []);
@@ -102,7 +104,7 @@ export default function Profile() {
       )}
       {!isLoading && (
         <div
-          className={`relative bg-gray-130 ${
+          className={`relative bg-gray-130 min-h-screen-cal-55 ${
             !!friendType ? "flex-[4.5]" : "flex-[6.5]"
           }`}
         >
@@ -123,8 +125,8 @@ export default function Profile() {
                     onClick={executeScroll}
                     className="Follows cursor-pointer"
                   >
-                    <div className="CountsTitles">Posts</div>
-                    <div className="CountsOf">{posts.length}</div>
+                    <div className="text-semibold text-lg">Posts</div>
+                    <div className="text-base">{posts.length}</div>
                   </span>
                   <button
                     onClick={() => {
@@ -132,8 +134,8 @@ export default function Profile() {
                     }}
                     className="Follows"
                   >
-                    <div className="CountsTitles">Followers</div>
-                    <div className="CountsOf">{follow}</div>
+                    <div className="text-semibold text-lg">Followers</div>
+                    <div className="text-base">{follow}</div>
                   </button>
                   <button
                     onClick={() => {
@@ -142,8 +144,8 @@ export default function Profile() {
                     }}
                     className="Follows"
                   >
-                    <div className="CountsTitles">Following</div>
-                    <div className="CountsOf">
+                    <div className="text-semibold text-lg">Following</div>
+                    <div className="text-base">
                       {profile?.followings?.length || 0}
                     </div>
                   </button>

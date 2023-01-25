@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, Close, Menu } from "@material-ui/icons";
+import { Search, Close, Menu, Message } from "@material-ui/icons";
 import { useDispatch, useSelector } from "react-redux";
 import Menubar from "../sidebar/menubar/Menubar";
 import { DEFAULT_AVATAR } from "../../constants/constants";
-import BASE_URL from "../../api/baseUrl";
+import { baseUrl } from "../../api/baseUrls";
 import MobSearchDropdown from "./mobSearchDropdown";
 import ClickOutside from "../../common/components/clickOutside";
 import MenusDropdown from "./menusDropdown";
@@ -27,7 +27,7 @@ export default function Navbar() {
     if (!searchterm) return;
     const timeout = setTimeout(() => {
       (async () => {
-        const { data } = await BASE_URL.get("/search", {
+        const { data } = await baseUrl.get("/search", {
           params: { username: searchterm },
         });
         setSearchdata(data);
@@ -88,15 +88,48 @@ export default function Navbar() {
           </ClickOutside>
         </div>
         <div className="flex items-center text-white">
-          <div className="flex items-center gap-4">
-            {user.isLoggedIn ? (
-              <Link
-                to="/write"
-                className="p-2.5 ml-2 text-blue-50 border-2 border-blue-50 no-underline rounded mr-2 text-sm cursor-pointer md:block hidden duration-200 font-bold hover:bg-[#2484dd] hover:text-white"
-              >
-                Create Post
-              </Link>
-            ) : (
+          <div className="flex items-center gap-10">
+            {user.isLoggedIn && (
+              <div className="flex items-center md:gap-6 gap-3 ml-3">
+                <Link
+                  to="/write"
+                  className="p-2.5 ml-2 text-blue-50 border-2 border-blue-50 no-underline rounded mr-2 text-sm cursor-pointer md:block hidden duration-200 font-bold hover:bg-[#2484dd] hover:text-white"
+                >
+                  Create Post
+                </Link>
+                <div>
+                  <Link to="/chat" className="block">
+                    <Message className="text-2xl text-[#817d7d]" />
+                  </Link>
+                </div>
+                <button
+                  onClick={() => setShowSearch((p) => !p)}
+                  className="md:hidden"
+                >
+                  {!showSearch ? (
+                    <Search className="text-4xl text-[#817d7d]" />
+                  ) : (
+                    <Close className="text-4xl text-[#817d7d]" />
+                  )}
+                </button>
+                <div className="relative cursor-pointer">
+                  <img
+                    src={user.profilepicture || DEFAULT_AVATAR}
+                    alt=""
+                    className="w-9 h-9 rounded-full object-cover"
+                    onClick={() => setShowMenu((p) => !p)}
+                  />
+                  {showMenu && (
+                    <MenusDropdown
+                      onLogout={handlelogout}
+                      user={user}
+                      onClose={setShowMenu}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+            {!user.isLoggedIn && (
               <>
                 <Link
                   to="/login"
@@ -113,35 +146,6 @@ export default function Navbar() {
               </>
             )}
           </div>
-          {user.isLoggedIn && (
-            <div className="flex items-center gap-4 ml-3">
-              <button
-                onClick={() => setShowSearch((p) => !p)}
-                className="md:hidden"
-              >
-                {!showSearch ? (
-                  <Search className="text-4xl text-[#817d7d]" />
-                ) : (
-                  <Close className="text-4xl text-[#817d7d]" />
-                )}
-              </button>
-              <div className="relative cursor-pointer">
-                <img
-                  src={user.profilepicture || DEFAULT_AVATAR}
-                  alt=""
-                  className="w-9 h-9 rounded-full object-cover"
-                  onClick={() => setShowMenu((p) => !p)}
-                />
-                {showMenu && (
-                  <MenusDropdown
-                    onLogout={handlelogout}
-                    user={user}
-                    onClose={setShowMenu}
-                  />
-                )}
-              </div>
-            </div>
-          )}
         </div>
         {showSearch && (
           <MobSearchDropdown

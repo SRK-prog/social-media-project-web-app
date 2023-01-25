@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { ArrowBack } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 import Message from "../../components/message/Message";
-import BASE_URL from "../../api/baseUrl";
+import { chatBaseUrl } from "../../api/baseUrls";
 import { DEFAULT_AVATAR } from "../../constants/constants";
 import Utils from "../../utils";
 import InputField from "./inputField";
@@ -54,7 +54,7 @@ const Conversations = (props) => {
       updateLoading(true);
       const {
         data: { data, total },
-      } = await BASE_URL.get("/messages/get-messages", { params });
+      } = await chatBaseUrl.get("/messages", { params });
       return [data, total];
     } catch (error) {
       console.error("fetchMessages:- ", error);
@@ -198,7 +198,7 @@ const Conversations = (props) => {
         { ...message, _id: Date.now(), promise },
         ...prev,
       ]);
-      await BASE_URL.post("/messages", message);
+      await chatBaseUrl.post("/messages", message);
     } catch (err) {
       console.log(err);
     }
@@ -231,7 +231,7 @@ const Conversations = (props) => {
           </button>
           <Link
             className="flex gap-4 items-center"
-            to={`/profile/${currentChat?.username}`}
+            to={`/profile/${currentChat?.userId}`}
           >
             <img
               className="w-10 h-10 object-cover rounded-full"
@@ -252,8 +252,8 @@ const Conversations = (props) => {
           <div className="circle-loader"></div>
         </div>
       )}
-      <div className="h-full overflow-y-auto px-2.5 my-4 custom-scrollbar flex flex-col-reverse">
-        <div ref={scrollRef}></div>
+      <div className="h-full overflow-y-auto px-3.5 pt-6 custom-scrollbar flex flex-col-reverse">
+        <div className="mt-6" ref={scrollRef}></div>
         {messages.map((m) => (
           <div className="px-4" key={m._id}>
             <Message
@@ -264,7 +264,7 @@ const Conversations = (props) => {
           </div>
         ))}
         <div ref={topEndRef}></div>
-        <div className="text-center rounded bg-white text-xs text-darkGray-20 border py-2.5 border-gray-120 mx-10">
+        <div className="text-center rounded bg-white text-xs mb-auto text-darkGray-20 border py-2.5 border-gray-120 mx-10">
           Do not share any personal information in chat because I'm watching you
         </div>
       </div>
